@@ -6,6 +6,7 @@ from .utils import str_to_char_p
 class CObject(ctypes.c_void_p):
     """"""
 
+
 # getattr to cheat type hints
 CShort: int = getattr(ctypes, 'c_short')
 CShortU: int = getattr(ctypes, 'c_ushort')
