@@ -7,7 +7,7 @@ https://github.com/idlesign/ctyped
 Description
 -----------
 
-*Build ctypes interfaces for shared libraries with typehinting*
+*Build ctypes interfaces for shared libraries with type hinting*
 
 **Requires Python 3.6+**
 

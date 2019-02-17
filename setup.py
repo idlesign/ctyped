@@ -29,7 +29,7 @@ setup(
     version=get_version(),
     url='https://github.com/idlesign/ctyped',
 
-    description='Build ctypes interfaces for shared libraries with typehinting',
+    description='Build ctypes interfaces for shared libraries with type hinting',
     long_description=read_file('README.rst'),
     license='BSD 3-Clause License',
 
