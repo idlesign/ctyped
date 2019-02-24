@@ -15,10 +15,6 @@ class CastedTypeBase:
         raise NotImplementedError
 
 
-class CObject(ctypes.c_void_p):
-    """"""
-
-
 # getattr to cheat type hints
 CShort: int = getattr(ctypes, 'c_short')
 CShortU: int = getattr(ctypes, 'c_ushort')
@@ -38,7 +34,27 @@ CInt32U: int = getattr(ctypes, 'c_uint32')
 CInt64: int = getattr(ctypes, 'c_int64')
 CInt64U: int = getattr(ctypes, 'c_uint64')
 
-CPointer: CObject = getattr(ctypes, 'c_void_p')
+CPointer: Any = getattr(ctypes, 'c_void_p')
+
+
+class CObject(CastedTypeBase):
+    """Helper to represent a C pointer as a link to a Python object."""
+
+    _ct_typ = ctypes.c_void_p
+    _ct_val = None  # Object attribute.
+
+    @classmethod
+    def _ct_res(cls, result: bytes, func: Callable, args: Tuple):
+
+        obj = cls()
+        # todo The following binding may be too late when __init__ depends on it.
+        obj._ct_val = result
+
+        return obj
+
+    @classmethod
+    def from_param(cls, obj: 'CObject'):
+        return ctypes.c_void_p(obj._ct_val)
 
 
 class CChars(CastedTypeBase):
