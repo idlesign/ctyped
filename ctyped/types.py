@@ -1,6 +1,12 @@
 import ctypes
 
-from .utils import str_to_char_p
+from .utils import str_to_char_p, str_to_wchar_p, str_from_char_p, str_from_wchar_p
+
+
+class CastedTypeBase:
+
+    from_param = None
+    to_result = None
 
 
 class CObject(ctypes.c_void_p):
@@ -29,9 +35,15 @@ CInt64U: int = getattr(ctypes, 'c_uint64')
 CPointer: CObject = getattr(ctypes, 'c_void_p')
 
 
-class CStr:
-    """Represents Python string as a C chars pointer."""
+class CChars(CastedTypeBase):
+    """Represents a Python string as a C chars pointer."""
 
-    @classmethod
-    def from_param(cls, val):
-        return str_to_char_p(val)
+    from_param = str_to_char_p
+    to_result = str_from_char_p
+
+
+class CCharsW(CastedTypeBase):
+    """Represents a Python string as a C wide chars pointer."""
+
+    from_param = str_to_wchar_p
+    to_result = str_from_wchar_p

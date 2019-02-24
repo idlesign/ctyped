@@ -4,7 +4,7 @@ import pytest
 
 from ctyped.exceptions import FunctionRedeclared, TypehintError, UnsupportedTypeError
 from ctyped.toolbox import Library, get_last_error
-from ctyped.types import CInt
+from ctyped.types import CInt, CCharsW
 
 ############################################################
 # Library interface
@@ -36,6 +36,10 @@ with mylib.functions_prefix('f_prefix_one_'):
 
     @mylib.f('char_p')
     def func_str(some: str) -> str:
+        ...
+
+    @mylib.f('wchar_p', str_type=CCharsW)
+    def func_str_utf(some: str) -> str:
         ...
 
     with mylib.functions_prefix('prefix_two_'):
@@ -92,6 +96,7 @@ def test_with_errno():
 def test_strings():
 
     assert func_str('mind') == 'hereyouare: mind'
+    assert func_str_utf('пример') == 'вот: пример'
 
 
 def test_no_redeclare():

@@ -2,6 +2,11 @@ ctyped changelog
 ================
 
 
+Unreleased
+----------
++ Added support for Python strings as wide chars.
+
+
 v0.1.0
 ------
 + Basic functionality.

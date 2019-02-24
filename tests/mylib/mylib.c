@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <wchar.h>
+#include <locale.h>
 
 
 int buggy1() {
@@ -58,8 +60,21 @@ int f_prefix_one_probe_add_two(int val) {
 
 const char * f_prefix_one_char_p(char* val) {
     char prefix[] = "hereyouare: ";
-    char *out = malloc(sizeof(char) * (strlen(prefix) + strlen(val) + 1 ) );
+    char *out = malloc(sizeof(char) * (strlen(prefix) + strlen(val) + 1 ));
     strcpy(out, prefix);
     strcat(out, val);
+    return out;
+}
+
+
+const wchar_t * f_prefix_one_wchar_p(wchar_t* val) {
+    setlocale(LC_ALL, "en_US.utf8");
+
+    wchar_t prefix[] = L"вот: ";
+    wchar_t *out = malloc(sizeof(wchar_t) * (wcslen(prefix) + wcslen(val) + 1 ));
+
+    wcsncpy(out, prefix, 20);
+    wcsncat(out, val, 20);
+
     return out;
 }

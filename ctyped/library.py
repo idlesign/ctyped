@@ -9,13 +9,12 @@ from functools import partial, partialmethod
 from typing import Any, Optional, Callable
 
 from .exceptions import FunctionRedeclared, UnsupportedTypeError, TypehintError
-from .types import CStr
-from .utils import str_from_char_p
+from .types import CChars, CastedTypeBase
 
 LOGGER = logging.getLogger(__name__)
 
 
-FuncInfo = namedtuple('FuncInfo', ['name_py', 'name_c', 'annotations'])
+FuncInfo = namedtuple('FuncInfo', ['name_py', 'name_c', 'annotations', 'options'])
 
 
 _MISSING = namedtuple('MissingType', [])
@@ -40,16 +39,29 @@ class Library:
 
     """
 
-    def __init__(self, name: str, *, autoload: bool=True):
+    def __init__(self, name: str, *, autoload: bool=True, str_type: CastedTypeBase=CChars):
         """
 
         :param name: Shared library name or filepath.
+
         :param autoload: Load library just on Library object initialization.
+
+        :param str_type: Type to represent strings.
+
+            * ``CChars`` - strings as chars (ANSI) **default**
+            * ``CCharsW`` - strings as wide chars (UTF)
+
+            .. note:: This setting is global to library. Can be changed on function definition level.
+
         """
         self.name = name
         self.lib = None
         self.funcs = {}
         self._prefixes = []
+
+        self._options = {
+            'str_type': str_type,
+        }
 
         autoload and self.load()
 
@@ -92,7 +104,7 @@ class Library:
 
         self.lib = lib
 
-    def function(self, name_c: Optional[str]=None, *, wrap: bool=False):
+    def function(self, name_c: Optional[str]=None, *, wrap: bool=False, str_type: Optional[CastedTypeBase]=None):
         """Decorator to mark functions which exported from the library.
 
         :param name_c: C function name with or without prefix (see ``.functions_prefix()``).
@@ -122,6 +134,8 @@ class Library:
                         result = cfunc()
                         return result + 1
 
+        :param str_type: Type to represent strings.
+            Overrides the same named param from library level (see ``__init__`` description).
 
         """
         def cfunc_wrapped(*args, f: Callable, **kwargs):
@@ -138,7 +152,11 @@ class Library:
 
         def function_(func_py: Callable):
 
-            info = self._extract_func_info(func_py, name_c=name_c)
+            options = {
+                'str_type': str_type or self._options['str_type'],
+            }
+
+            info = self._extract_func_info(func_py, name_c=name_c, options=options)
             name = info.name_c
 
             func_c = getattr(self.lib, name)
@@ -217,12 +235,14 @@ class Library:
                         'Unable to resolve typehint. Function: %s. Arg: %s. Type: %s. ' %
                         (name_py, name, thint_orig))
 
+            string_type = func_info.options['str_type']
+
             if name == 'return' and thint is str:
                 # Cast result to Python string.
-                return str_from_char_p
+                return string_type.to_result
 
             if thint is str:
-                thint = CStr
+                thint = string_type
 
             return thint
 
@@ -265,7 +285,7 @@ class Library:
     #####################################################################################
     # Private
 
-    def _extract_func_info(self, func: Callable, *, name_c: Optional[str]=None) -> FuncInfo:
+    def _extract_func_info(self, func: Callable, *, name_c: Optional[str]=None, options: dict=None) -> FuncInfo:
 
         name_py = func.__name__
         name = name_c or name_py
@@ -293,4 +313,4 @@ class Library:
 
         annotated_args['return'] = annotations.get('return')
 
-        return FuncInfo(name_py=name_py, name_c=name, annotations=annotated_args)
+        return FuncInfo(name_py=name_py, name_c=name, annotations=annotated_args, options=options)
