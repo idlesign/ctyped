@@ -5,6 +5,7 @@ ctyped changelog
 Unreleased
 ----------
 + Added support for Python strings as wide chars.
+* Result is now casted with 'errcheck'.
 
 
 v0.1.0

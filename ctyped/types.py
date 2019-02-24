@@ -1,12 +1,18 @@
 import ctypes
-
-from .utils import str_to_char_p, str_to_wchar_p, str_from_char_p, str_from_wchar_p
+from typing import Callable, Type, Any, Tuple
 
 
 class CastedTypeBase:
 
-    from_param = None
-    to_result = None
+    _ct_typ: Type[ctypes._SimpleCData] = None
+
+    @classmethod
+    def _ct_res(cls, result: ctypes._SimpleCData, func: Callable, args: Tuple):
+        raise NotImplementedError
+
+    @classmethod
+    def from_param(cls, val: Any):
+        raise NotImplementedError
 
 
 class CObject(ctypes.c_void_p):
@@ -38,12 +44,26 @@ CPointer: CObject = getattr(ctypes, 'c_void_p')
 class CChars(CastedTypeBase):
     """Represents a Python string as a C chars pointer."""
 
-    from_param = str_to_char_p
-    to_result = str_from_char_p
+    _ct_typ = ctypes.c_char_p
+
+    @classmethod
+    def _ct_res(cls, result: bytes, func: Callable, args: Tuple):
+        return result.decode('utf-8')
+
+    @classmethod
+    def from_param(cls, val: str):
+        return ctypes.c_char_p(val.encode('utf-8'))
 
 
 class CCharsW(CastedTypeBase):
     """Represents a Python string as a C wide chars pointer."""
 
-    from_param = str_to_wchar_p
-    to_result = str_from_wchar_p
+    _ct_typ = ctypes.c_wchar_p
+
+    @classmethod
+    def _ct_res(cls, result: bytes, func: Callable, args: Tuple):
+        return result
+
+    @classmethod
+    def from_param(cls, val: str):
+        return ctypes.c_wchar_p(val)

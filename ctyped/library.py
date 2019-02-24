@@ -203,7 +203,7 @@ class Library:
         return self.function(name_c=name_c, wrap=True)
 
     def bind_types(self):
-        """Deduces ctypes argument and result types from Python typehints,
+        """Deduces ctypes argument and result types from Python type hints,
         binding those types to ctypes functions.
 
 
@@ -232,17 +232,11 @@ class Library:
 
                 if thint is None:
                     raise TypehintError(
-                        'Unable to resolve typehint. Function: %s. Arg: %s. Type: %s. ' %
+                        'Unable to resolve type hint. Function: %s. Arg: %s. Type: %s. ' %
                         (name_py, name, thint_orig))
 
-            string_type = func_info.options['str_type']
-
-            if name == 'return' and thint is str:
-                # Cast result to Python string.
-                return string_type.to_result
-
             if thint is str:
-                thint = string_type
+                thint = func_info.options['str_type']
 
             return thint
 
@@ -253,9 +247,15 @@ class Library:
 
             name_py = func_info.name_py
             annotations = func_info.annotations
+            errcheck = None
 
             try:
                 restype = cast_type('return', annotations.pop('return', None))
+
+                if restype and issubclass(restype, CastedTypeBase):
+                    errcheck = restype._ct_res
+                    restype = restype._ct_typ
+
                 argtypes = [cast_type(argname, argtype) for argname, argtype in annotations.items()]
 
             except TypehintError:
@@ -270,11 +270,14 @@ class Library:
                 if restype:
                     func_c.restype = restype
 
+                if errcheck:
+                    func_c.errcheck = errcheck
+
             except TypeError as e:
 
                 raise UnsupportedTypeError(
-                    'Unsupported types declared for %s (%s). Args: %s. Result: %s.' %
-                    (name_py, name_c, argtypes, restype)) from e
+                    'Unsupported types declared for %s (%s). Args: %s. Result: %s. Errcheck: %s.' %
+                    (name_py, name_c, argtypes, restype, errcheck)) from e
 
     #####################################################################################
     # Shortcuts
