@@ -8,7 +8,7 @@ from ctypes.util import find_library
 from functools import partial, partialmethod
 from typing import Any, Optional, Callable
 
-from .exceptions import FunctionRedeclared, UnsupportedTypeError, TypehintError
+from .exceptions import FunctionRedeclared, UnsupportedTypeError, TypehintError, CtypedException
 from .types import CChars, CastedTypeBase
 
 LOGGER = logging.getLogger(__name__)
@@ -101,6 +101,9 @@ class Library:
 
         if lib._name is None:
             lib = None
+
+        if lib is None:
+            raise CtypedException('Unable to find library: %s' % name)
 
         self.lib = lib
 
