@@ -73,8 +73,8 @@ const wchar_t * f_prefix_one_wchar_p(wchar_t* val) {
     wchar_t prefix[] = L"вот: ";
     wchar_t *out = malloc(sizeof(wchar_t) * (wcslen(prefix) + wcslen(val) + 1 ));
 
-    wcsncpy(out, prefix, 20);
-    wcsncat(out, val, 20);
+    wcscpy(out, prefix);
+    wcscat(out, val);
 
     return out;
 }

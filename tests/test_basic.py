@@ -1,4 +1,5 @@
 import os
+import faulthandler
 
 import pytest
 
@@ -8,6 +9,9 @@ from ctyped.types import CInt, CCharsW
 
 ############################################################
 # Library interface
+
+# Watch for crashes.
+faulthandler.enable()
 
 MYLIB_PATH = os.path.join(os.path.dirname(__file__), 'mylib', 'mylib.so')
 
