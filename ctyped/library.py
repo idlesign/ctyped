@@ -204,16 +204,14 @@ class Library:
                 if 'cfunc' in func_args:
                     # Use existing function, pass `cfunc`.
 
-                    LOGGER.debug(
-                        'Function %s (%s) is wrapped and implements manual `cfunc` handling.', info.name_py, name)
+                    LOGGER.debug('Func [ %s -> %s ] uses wrapped manual call.', name, info.name_py)
 
                     func_swapped = partialmethod(func_py, cfunc=partial(cfunc_wrapped, f=func_c))
 
                 else:
                     # Use automatic function.
 
-                    LOGGER.debug(
-                        'Function %s (%s) is wrapped and implements automatic proxied ctypes call.', info.name_py, name)
+                    LOGGER.debug('Func [ %s -> %s ] uses wrapped auto call.', name, info.name_py)
 
                     func_swapped = partialmethod(cfunc_direct, f=func_c)
 
@@ -222,7 +220,7 @@ class Library:
 
             else:
 
-                LOGGER.debug('Function %s is swapped with direct ctypes %s call.' % (info.name_py, name))
+                LOGGER.debug('Func [ %s -> %s ] uses direct call.' % (name, info.name_py))
 
                 func_out = func_c
 
