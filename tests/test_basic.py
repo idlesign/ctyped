@@ -15,7 +15,7 @@ faulthandler.enable()
 
 MYLIB_PATH = os.path.join(os.path.dirname(__file__), 'mylib', 'mylib.so')
 
-mylib = Library(MYLIB_PATH)
+mylib = Library(MYLIB_PATH, int_bits=32)
 
 
 @mylib.f()

@@ -2,14 +2,15 @@ import ctypes
 import inspect
 import logging
 import os
+from enum import Enum
 from collections import namedtuple, OrderedDict
 from contextlib import contextmanager
 from ctypes.util import find_library
 from functools import partial, partialmethod
-from typing import Any, Optional, Callable
+from typing import Any, Optional, Callable, Union
 
 from .exceptions import FunctionRedeclared, UnsupportedTypeError, TypehintError, CtypedException
-from .types import CChars, CastedTypeBase
+from .types import CChars, CastedTypeBase, CInt8, CInt16, CInt32, CInt64
 
 LOGGER = logging.getLogger(__name__)
 
@@ -39,7 +40,10 @@ class Library:
 
     """
 
-    def __init__(self, name: str, *, autoload: bool=True, str_type: CastedTypeBase=CChars):
+    def __init__(
+            self, name: str, *, autoload: bool=True,
+            str_type: CastedTypeBase=CChars,
+            int_bits: Optional[int]=None):
         """
 
         :param name: Shared library name or filepath.
@@ -53,6 +57,10 @@ class Library:
 
             .. note:: This setting is global to library. Can be changed on function definition level.
 
+        :param int_bits: int length to use by default. 8, 16, 32, 64
+
+            .. note:: This setting is global to library. Can be changed on function definition level.
+
         """
         self.name = name
         self.lib = None
@@ -61,6 +69,7 @@ class Library:
 
         self._options = {
             'str_type': str_type,
+            'int_bits': int_bits,
         }
 
         autoload and self.load()
@@ -107,7 +116,10 @@ class Library:
 
         self.lib = lib
 
-    def function(self, name_c: Optional[str]=None, *, wrap: bool=False, str_type: Optional[CastedTypeBase]=None):
+    def function(
+            self, name_c: Optional[str]=None, *, wrap: bool=False,
+            str_type: Optional[CastedTypeBase]=None,
+            int_bits: Optional[int]=None):
         """Decorator to mark functions which exported from the library.
 
         :param name_c: C function name with or without prefix (see ``.functions_prefix()``).
@@ -138,7 +150,12 @@ class Library:
                         return result + 1
 
         :param str_type: Type to represent strings.
-            Overrides the same named param from library level (see ``__init__`` description).
+
+            .. note:: Overrides the same named param from library level (see ``__init__`` description).
+
+        :param int_bits: int length to be used in function.
+
+            .. note:: Overrides the same named param from library level (see ``__init__`` description).
 
         """
         def cfunc_wrapped(*args, f: Callable, **kwargs):
@@ -157,6 +174,7 @@ class Library:
 
             options = {
                 'str_type': str_type or self._options['str_type'],
+                'int_bits': int_bits or self._options['int_bits'],
             }
 
             info = self._extract_func_info(func_py, name_c=name_c, options=options)
@@ -201,9 +219,9 @@ class Library:
 
         return function_
 
-    def method(self, name_c: Optional[str]=None):
+    def method(self, name_c: Optional[str]=None, **kwargs):
         """Decorator. The same as ``.function()`` with ``wrap=True``."""
-        return self.function(name_c=name_c, wrap=True)
+        return self.function(name_c=name_c, wrap=True, **kwargs)
 
     def bind_types(self):
         """Deduces ctypes argument and result types from Python type hints,
@@ -240,6 +258,23 @@ class Library:
 
             if thint is str:
                 thint = func_info.options['str_type']
+
+            if thint is int:
+                int_bits = func_info.options['int_bits']
+
+                if int_bits:
+                    assert int_bits in {8, 16, 32, 64}, 'Wrong value passed for int_bits.'
+
+                int_bits = {
+
+                    8: CInt8,
+                    16: CInt16,
+                    32: CInt32,
+                    64: CInt64,
+
+                }.get(int_bits)
+
+                thint = int_bits or thint
 
             return thint
 

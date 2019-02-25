@@ -4,6 +4,7 @@ ctyped changelog
 
 Unreleased
 ----------
++ Added 'int_bits' shortcut option.
 + Added CObject convenience.
 + Added support for Python strings as wide chars.
 * Result is now casted with 'errcheck'.
