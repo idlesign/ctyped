@@ -2,8 +2,8 @@ ctyped changelog
 ================
 
 
-Unreleased
-----------
+v0.2.0
+------
 + Added 'int_bits' shortcut option.
 + Added 'int_sign' shortcut option.
 + Added CObject convenience.
