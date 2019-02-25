@@ -38,6 +38,10 @@ with mylib.functions_prefix('f_prefix_one_'):
     def func_2() -> int:
         ...
 
+    @mylib.function(int_bits=8, int_sign=False)
+    def uint8_add(val: int) -> int:
+        ...
+
     @mylib.f('char_p')
     def func_str(some: str) -> str:
         ...
@@ -79,6 +83,7 @@ def test_basic():
     assert function_one() == 1
     assert func_2() == 2
     assert func_prefix_two_3() == 3
+    assert uint8_add(4) == 5
 
     prober = get_prober()
     assert isinstance(prober, Prober)

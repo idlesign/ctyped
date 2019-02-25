@@ -2,15 +2,14 @@ import ctypes
 import inspect
 import logging
 import os
-from enum import Enum
 from collections import namedtuple, OrderedDict
 from contextlib import contextmanager
 from ctypes.util import find_library
 from functools import partial, partialmethod
-from typing import Any, Optional, Callable, Union
+from typing import Any, Optional, Callable
 
 from .exceptions import FunctionRedeclared, UnsupportedTypeError, TypehintError, CtypedException
-from .types import CChars, CastedTypeBase, CInt8, CInt16, CInt32, CInt64
+from .types import CChars, CastedTypeBase, CInt8, CInt16, CInt32, CInt64, CInt8U, CInt16U, CInt32U, CInt64U
 
 LOGGER = logging.getLogger(__name__)
 
@@ -43,7 +42,8 @@ class Library:
     def __init__(
             self, name: str, *, autoload: bool=True,
             str_type: CastedTypeBase=CChars,
-            int_bits: Optional[int]=None):
+            int_bits: Optional[int]=None,
+            int_sign: Optional[bool]=None):
         """
 
         :param name: Shared library name or filepath.
@@ -57,7 +57,13 @@ class Library:
 
             .. note:: This setting is global to library. Can be changed on function definition level.
 
-        :param int_bits: int length to use by default. 8, 16, 32, 64
+        :param int_bits: int length to use by default.
+
+            Possible values: 8, 16, 32, 64
+
+            .. note:: This setting is global to library. Can be changed on function definition level.
+
+        :param int_sign: Flag. Whether to use signed (True) or unsigned (False) ints.
 
             .. note:: This setting is global to library. Can be changed on function definition level.
 
@@ -70,6 +76,7 @@ class Library:
         self._options = {
             'str_type': str_type,
             'int_bits': int_bits,
+            'int_sign': int_sign,
         }
 
         autoload and self.load()
@@ -119,7 +126,8 @@ class Library:
     def function(
             self, name_c: Optional[str]=None, *, wrap: bool=False,
             str_type: Optional[CastedTypeBase]=None,
-            int_bits: Optional[int]=None):
+            int_bits: Optional[int]=None,
+            int_sign: Optional[bool]=None):
         """Decorator to mark functions which exported from the library.
 
         :param name_c: C function name with or without prefix (see ``.functions_prefix()``).
@@ -157,6 +165,10 @@ class Library:
 
             .. note:: Overrides the same named param from library level (see ``__init__`` description).
 
+        :param int_sign: Flag. Whether to use signed (True) or unsigned (False) ints.
+
+            .. note:: Overrides the same named param from library level (see ``__init__`` description).
+
         """
         def cfunc_wrapped(*args, f: Callable, **kwargs):
 
@@ -175,6 +187,7 @@ class Library:
             options = {
                 'str_type': str_type or self._options['str_type'],
                 'int_bits': int_bits or self._options['int_bits'],
+                'int_sign': self._options['int_sign'] if int_sign is None else int_sign ,
             }
 
             info = self._extract_func_info(func_py, name_c=name_c, options=options)
@@ -261,20 +274,28 @@ class Library:
 
             if thint is int:
                 int_bits = func_info.options['int_bits']
+                int_sign = func_info.options['int_sign']
 
                 if int_bits:
                     assert int_bits in {8, 16, 32, 64}, 'Wrong value passed for int_bits.'
 
-                int_bits = {
-
+                bits_map = {
                     8: CInt8,
                     16: CInt16,
                     32: CInt32,
                     64: CInt64,
+                }
 
-                }.get(int_bits)
+                if int_sign is False:
 
-                thint = int_bits or thint
+                    bits_map = {
+                        8: CInt8U,
+                        16: CInt16U,
+                        32: CInt32U,
+                        64: CInt64U,
+                    }
+
+                thint = bits_map.get(int_bits) or thint
 
             return thint
 

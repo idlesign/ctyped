@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 #include <errno.h>
 #include <wchar.h>
@@ -56,6 +57,11 @@ int f_prefix_one_probe_add_one(int val) {
 
 int f_prefix_one_probe_add_two(int val) {
     return val + 2;
+}
+
+
+uint8_t f_prefix_one_uint8_add(uint8_t val) {
+    return val + 1;
 }
 
 const char * f_prefix_one_char_p(char* val) {
