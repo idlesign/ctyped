@@ -337,23 +337,16 @@ class Library:
                 if int_bits:
                     assert int_bits in {8, 16, 32, 64}, 'Wrong value passed for int_bits.'
 
-                bits_map = {
-                    8: CInt8,
-                    16: CInt16,
-                    32: CInt32,
-                    64: CInt64,
-                }
+                type_idx = 1 if int_sign is False else 0
 
-                if int_sign is False:
+                thint = {
 
-                    bits_map = {
-                        8: CInt8U,
-                        16: CInt16U,
-                        32: CInt32U,
-                        64: CInt64U,
-                    }
+                    8: (CInt8, CInt8U),
+                    16: (CInt16, CInt16U),
+                    32: (CInt32, CInt32U),
+                    64: (CInt64, CInt64U),
 
-                thint = bits_map.get(int_bits) or thint
+                }.get(int_bits)[type_idx] or thint
 
             return thint
 
