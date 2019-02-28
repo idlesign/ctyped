@@ -2,6 +2,11 @@ ctyped changelog
 ================
 
 
+Unreleased
+----------
++ 'functions_prefix' context manager is replaced by advanced 'scope'.
+
+
 v0.2.0
 ------
 + Added 'int_bits' shortcut option.

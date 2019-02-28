@@ -12,14 +12,14 @@ Quickstart
     lib = Library('mylib.so')
 
     # Type less with function names prefixes.
-    with lib.functions_prefix('mylib_'):
+    with lib.scope(prefix='mylib_'):
 
         # Describe function available in the library.
         @lib.function()
         def some_func(title: str, year: int) -> str:
             ...
 
-        with lib.functions_prefix('mylib_grouped_'):
+        with lib.scope(prefix='mylib_grouped_', int_bits=64, int_sign=False):
 
             class Thing(CInt):
 

@@ -28,7 +28,7 @@ def with_errno() -> int:
     ...
 
 
-with mylib.functions_prefix('f_prefix_one_'):
+with mylib.scope('f_prefix_one_'):
 
     @mylib.function('func_1')
     def function_one() -> int:
@@ -50,7 +50,7 @@ with mylib.functions_prefix('f_prefix_one_'):
     def func_str_utf(some: str) -> str:
         ...
 
-    with mylib.functions_prefix('prefix_two_'):
+    with mylib.s('prefix_two_'):
 
         @mylib.f('func_3')
         def func_prefix_two_3() -> int:

@@ -5,7 +5,7 @@ import os
 from collections import namedtuple, OrderedDict
 from contextlib import contextmanager
 from ctypes.util import find_library
-from functools import partial, partialmethod
+from functools import partial, partialmethod, reduce
 from typing import Any, Optional, Callable
 
 from .exceptions import FunctionRedeclared, UnsupportedTypeError, TypehintError, CtypedException
@@ -20,6 +20,58 @@ FuncInfo = namedtuple('FuncInfo', ['name_py', 'name_c', 'annotations', 'options'
 _MISSING = namedtuple('MissingType', [])
 
 
+class Scopes:
+
+    def __init__(self):
+        self._scopes = []
+        self._keys = ['prefix', 'str_type', 'int_bits', 'int_sign']
+
+    def push(self, params):
+
+        scope = {key: params.get(key) for key in self._keys}
+        self._scopes.append(scope)
+
+    def pop(self):
+        self._scopes.pop()
+
+    def flatten(self):
+
+        scopes = self._scopes
+        keys_bool = {'int_sign'}
+        keys_concat = {'prefix'}
+        result = {}
+
+        def choose(current, prev):
+            return current or prev
+
+        def pick_bool(current, prev):
+            return current if current is not None else prev
+
+        def concat(current, prev):
+            return (prev or '') + (current or '')
+
+        for key in self._keys:
+
+            if key in keys_concat:
+                reducer = concat
+
+            elif key in keys_bool:
+                reducer = pick_bool
+
+            else:
+                reducer = choose
+
+            result[key] = reduce(reducer, (scope[key] for scope in scopes[::-1]))
+
+        return result
+
+    @contextmanager
+    def context(self, params):
+        self.push(params)
+        yield self
+        self.pop()
+
+
 class Library:
     """Main entry point to describe C library interface.
 
@@ -29,7 +81,7 @@ class Library:
 
         lib = Library('mylib')
 
-        with lib.functions_prefix('mylib_'):
+        with lib.scope(prefix='mylib_'):
 
             @lib.function()
             def my_func():
@@ -41,14 +93,20 @@ class Library:
 
     def __init__(
             self, name: str, *, autoload: bool=True,
+            prefix: Optional[str] = None,
             str_type: CastedTypeBase=CChars,
             int_bits: Optional[int]=None,
-            int_sign: Optional[bool]=None):
+            int_sign: Optional[bool]=None
+    ):
         """
 
         :param name: Shared library name or filepath.
 
         :param autoload: Load library just on Library object initialization.
+
+        :param prefix: Function name prefix to apply to functions under the manager.
+
+            Useful when C functions have common prefixes.
 
         :param str_type: Type to represent strings.
 
@@ -68,43 +126,45 @@ class Library:
             .. note:: This setting is global to library. Can be changed on function definition level.
 
         """
+        scopes = Scopes()
+        scopes.push(locals())
+
         self.name = name
         self.lib = None
         self.funcs = {}
-        self._prefixes = []
-
-        self._options = {
-            'str_type': str_type,
-            'int_bits': int_bits,
-            'int_sign': int_sign,
-        }
+        self._scopes = scopes
 
         autoload and self.load()
 
     @contextmanager
-    def functions_prefix(self, prefix: str):
-        """Nestable context manager. Used for namespacing.
-
-        Useful when C functions have common prefixes.
+    def scope(
+        self,
+        prefix: Optional[str]=None, *,
+        str_type: Optional[CastedTypeBase] = None,
+        int_bits: Optional[int]=None,
+        int_sign: Optional[bool]=None,
+    ):
+        """Nestable context manager. Used for namespacing and common parameters application..
 
         .. code-block:: python
 
-            with lib.functions_prefix('MyLib_'):
+            with lib.scope(prefix='MyLib_'):
 
-                @lib.f('my_func')  # Will be expanded into `MyLib_my_func`
-                def some_func():
+                @lib.f('my_func', int_bits=64)  # Will be expanded into `MyLib_my_func`
+                def some_func(val: int) -> int:
                     ...
 
-        :param prefix: Function name prefix to apply to
+        :param prefix: Function name prefix to apply to functions under the manager. See ``__init__`` docstrings.
+
+        :param str_type: Type to represent strings. See ``__init__`` docstrings.
+
+        :param int_bits: int length to use by default. See ``__init__`` docstrings.
+
+        :param int_sign: Flag. Whether to use signed (True) or unsigned (False) ints.  See ``__init__`` docstrings.
 
         """
-        prefixes = self._prefixes
-
-        prefixes.append(prefix)
-
-        yield
-
-        prefixes.pop()
+        with self._scopes.context(locals()):
+            yield
 
     def load(self):
         """Loads shared library."""
@@ -127,10 +187,11 @@ class Library:
             self, name_c: Optional[str]=None, *, wrap: bool=False,
             str_type: Optional[CastedTypeBase]=None,
             int_bits: Optional[int]=None,
-            int_sign: Optional[bool]=None):
+            int_sign: Optional[bool]=None
+    ):
         """Decorator to mark functions which exported from the library.
 
-        :param name_c: C function name with or without prefix (see ``.functions_prefix()``).
+        :param name_c: C function name with or without prefix (see ``.scope(prefix=)``).
             If not set, Python function name is used.
 
         :param wrap: Do not replace decorated function with ctypes function,
@@ -170,6 +231,8 @@ class Library:
             .. note:: Overrides the same named param from library level (see ``__init__`` description).
 
         """
+        locals_ = locals()
+
         def cfunc_wrapped(*args, f: Callable, **kwargs):
 
             if not args:
@@ -184,13 +247,10 @@ class Library:
 
         def function_(func_py: Callable):
 
-            options = {
-                'str_type': str_type or self._options['str_type'],
-                'int_bits': int_bits or self._options['int_bits'],
-                'int_sign': self._options['int_sign'] if int_sign is None else int_sign ,
-            }
+            with self._scopes.context(locals_) as scopes:
+                scope = scopes.flatten()
 
-            info = self._extract_func_info(func_py, name_c=name_c, options=options)
+            info = self._extract_func_info(func_py, name_c=name_c, scope=scope)
             name = info.name_c
 
             func_c = getattr(self.lib, name)
@@ -341,15 +401,15 @@ class Library:
 
     f = function
     m = method
+    s = scope
 
     #####################################################################################
     # Private
 
-    def _extract_func_info(self, func: Callable, *, name_c: Optional[str]=None, options: dict=None) -> FuncInfo:
+    def _extract_func_info(self, func: Callable, *, name_c: Optional[str]=None, scope: dict=None) -> FuncInfo:
 
         name_py = func.__name__
-        name = name_c or name_py
-        name = ''.join(self._prefixes) + name
+        name = scope['prefix'] + (name_c or name_py)
 
         if name in self.funcs:
             raise FunctionRedeclared('Unable to redeclare: %s (%s)' % (name, name_py))
@@ -373,4 +433,4 @@ class Library:
 
         annotated_args['return'] = annotations.get('return')
 
-        return FuncInfo(name_py=name_py, name_c=name, annotations=annotated_args, options=options)
+        return FuncInfo(name_py=name_py, name_c=name, annotations=annotated_args, options=scope)

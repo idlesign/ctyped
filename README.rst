@@ -39,7 +39,7 @@ Description
     lib = Library('mylib.so')
 
     # Type less with function names prefixes.
-    with lib.functions_prefix('mylib_'):
+    with lib.scope(prefix='mylib_'):
 
         # Describe function available in the library.
         @lib.function()
