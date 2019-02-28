@@ -2,7 +2,7 @@ import ctypes
 import inspect
 import logging
 import os
-from collections import namedtuple, OrderedDict
+from collections import namedtuple
 from contextlib import contextmanager
 from ctypes.util import find_library
 from functools import partial, partialmethod, reduce
@@ -414,7 +414,7 @@ class Library:
         if name in self.funcs:
             raise FunctionRedeclared('Unable to redeclare: %s (%s)' % (name, name_py))
 
-        annotated_args = OrderedDict()
+        annotated_args = {}
         annotations = func.__annotations__
 
         # Gather all args and annotations for them.
