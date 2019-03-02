@@ -6,7 +6,7 @@ python:
   - 3.6
 
 install:
-  - pip install pytest coverage coveralls
+  - pip install coverage coveralls
 
 script:
   - coverage run --source=ctyped setup.py test
