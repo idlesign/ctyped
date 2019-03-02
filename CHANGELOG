@@ -2,6 +2,11 @@ ctyped changelog
 ================
 
 
+Unreleased
+----------
++ Now '-> None' annotation can be used for 'void' result.
+
+
 v0.4.0
 ------
 + 'function/f' and 'method/m' decorators now allow no params (less brackets).

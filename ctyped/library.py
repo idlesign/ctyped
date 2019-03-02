@@ -401,6 +401,7 @@ class Library:
             errcheck = None
 
             try:
+                return_is_annotated = 'return' in annotations
                 restype = cast_type('return', annotations.pop('return', None))
 
                 if restype and issubclass(restype, CastedTypeBase):
@@ -418,7 +419,7 @@ class Library:
                 if argtypes:
                     func_c.argtypes = argtypes
 
-                if restype:
+                if restype or return_is_annotated:
                     func_c.restype = restype
 
                 if errcheck:
