@@ -22,9 +22,37 @@ _MISSING = namedtuple('MissingType', [])
 
 class Scopes:
 
-    def __init__(self):
+    def __init__(self, params):
         self._scopes = []
         self._keys = ['prefix', 'str_type', 'int_bits', 'int_sign']
+        self.push(params)
+
+    def __call__(
+            self,
+            prefix: Optional[str] = None,
+            str_type: CastedTypeBase = CChars,
+            int_bits: Optional[int] = None,
+            int_sign: Optional[bool] = None,
+            **kwargs) -> 'Scopes':
+        """
+
+        :param prefix:
+
+        :param str_type: Type to represent strings.
+
+            * ``CChars`` - strings as chars (ANSI) **default**
+            * ``CCharsW`` - strings as wide chars (UTF)
+
+        :param int_bits: int length to be used in function.
+
+            Possible values: 8, 16, 32, 64
+
+        :param int_sign: Flag. Whether to use signed (True) or unsigned (False) ints.
+
+        :param kwargs:
+
+        """
+        return self.context(locals())
 
     def push(self, params):
 
@@ -126,45 +154,14 @@ class Library:
             .. note:: This setting is global to library. Can be changed on function definition level.
 
         """
-        scopes = Scopes()
-        scopes.push(locals())
+        self.scope = Scopes(locals())
+        self.s = self.scope
 
         self.name = name
         self.lib = None
         self.funcs = {}
-        self._scopes = scopes
 
         autoload and self.load()
-
-    @contextmanager
-    def scope(
-        self,
-        prefix: Optional[str]=None, *,
-        str_type: Optional[CastedTypeBase] = None,
-        int_bits: Optional[int]=None,
-        int_sign: Optional[bool]=None,
-    ):
-        """Nestable context manager. Used for namespacing and common parameters application..
-
-        .. code-block:: python
-
-            with lib.scope(prefix='MyLib_'):
-
-                @lib.f('my_func', int_bits=64)  # Will be expanded into `MyLib_my_func`
-                def some_func(val: int) -> int:
-                    ...
-
-        :param prefix: Function name prefix to apply to functions under the manager. See ``__init__`` docstrings.
-
-        :param str_type: Type to represent strings. See ``__init__`` docstrings.
-
-        :param int_bits: int length to use by default. See ``__init__`` docstrings.
-
-        :param int_sign: Flag. Whether to use signed (True) or unsigned (False) ints.  See ``__init__`` docstrings.
-
-        """
-        with self._scopes.context(locals()):
-            yield
 
     def load(self):
         """Loads shared library."""
@@ -231,7 +228,11 @@ class Library:
             .. note:: Overrides the same named param from library level (see ``__init__`` description).
 
         """
-        locals_ = locals()
+        locals_ = dict(locals())
+        locals_.pop('self')
+
+        with self.scope(**locals_) as scope:
+            scope = scope.flatten()
 
         def cfunc_wrapped(*args, f: Callable, **kwargs):
 
@@ -246,9 +247,6 @@ class Library:
             return f(*args)
 
         def function_(func_py: Callable):
-
-            with self._scopes.context(locals_) as scopes:
-                scope = scopes.flatten()
 
             info = self._extract_func_info(func_py, name_c=name_c, scope=scope)
             name = info.name_c
@@ -394,7 +392,6 @@ class Library:
 
     f = function
     m = method
-    s = scope
 
     #####################################################################################
     # Private
