@@ -3,9 +3,10 @@ import faulthandler
 
 import pytest
 
+from ctypes import c_int
 from ctyped.exceptions import FunctionRedeclared, TypehintError, UnsupportedTypeError
 from ctyped.toolbox import Library, get_last_error
-from ctyped.types import CInt, CCharsW
+from ctyped.types import CInt, CCharsW, CRef
 
 ############################################################
 # Library interface
@@ -36,6 +37,10 @@ with mylib.scope('f_prefix_one_'):
 
     @mylib.function()
     def func_2() -> int:
+        ...
+
+    @mylib.f
+    def byref_int(val: CRef) -> None:
         ...
 
     @mylib.function(int_bits=8, int_sign=False)
@@ -96,6 +101,14 @@ def test_basic():
 
     assert prober.probe_add_one() == prober_val + 1
     assert prober.probe_add_three() == prober_val + 3
+
+    byref_val = CRef.int()
+    assert byref_int(byref_val) is None
+    assert int(byref_val) == 33
+    assert byref_val == 33
+    assert byref_val != 34
+    assert 32 < byref_val < 34
+    assert 32 <= byref_val <= 34
 
 
 def test_with_errno():

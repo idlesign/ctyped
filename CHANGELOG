@@ -4,6 +4,7 @@ ctyped changelog
 
 Unreleased
 ----------
++ Added 'CRef' helper to pass by reference in arguments.
 + Now '-> None' annotation can be used for 'void' result.
 
 

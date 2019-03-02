@@ -7,11 +7,11 @@ class CastedTypeBase:
     _ct_typ: Optional[Type[ctypes._SimpleCData]] = None
 
     @classmethod
-    def _ct_res(cls, result: Any, func: Callable, args: Tuple) -> Any:
+    def _ct_res(cls, result: Any, func: Callable, args: Tuple) -> Any:  # pragma: nocover
         raise NotImplementedError
 
     @classmethod
-    def from_param(cls, val: Any) -> Any:
+    def from_param(cls, val: Any) -> Any:  # pragma: nocover
         raise NotImplementedError
 
 
@@ -55,6 +55,42 @@ class CObject(CastedTypeBase):
     @classmethod
     def from_param(cls, obj: 'CObject'):
         return ctypes.c_void_p(obj._ct_val)
+
+
+class CRef(CastedTypeBase):
+    """Reference helper."""
+
+    def __init__(self, val):
+        self._ct_val = val
+
+    @classmethod
+    def from_param(cls, obj: 'CRef'):
+        return ctypes.byref(obj._ct_val)
+
+    @classmethod
+    def int(cls, value=0) -> 'CRef':
+        return cls(ctypes.c_int(value))
+
+    def __int__(self):
+        return self._ct_val.value
+
+    def __eq__(self, other):
+        return self._ct_val.value == other
+
+    def __ne__(self, other):
+        return self._ct_val.value != other
+
+    def __lt__(self, other):
+        return self._ct_val.value < other
+
+    def __gt__(self, other):
+        return self._ct_val.value > other
+
+    def __le__(self, other):
+        return self._ct_val.value <= other
+
+    def __ge__(self, other):
+        return self._ct_val.value >= other
 
 
 class CChars(CastedTypeBase):

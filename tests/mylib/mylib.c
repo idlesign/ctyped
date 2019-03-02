@@ -60,6 +60,11 @@ int f_prefix_one_probe_add_two(int val) {
 }
 
 
+void f_prefix_one_byref_int(int * val) {
+    *val = 33;
+}
+
+
 uint8_t f_prefix_one_uint8_add(uint8_t val) {
     return val + 1;
 }
