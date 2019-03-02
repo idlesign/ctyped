@@ -45,7 +45,9 @@ setup(
 
     test_suite='tests',
 
-    tests_require = ['pytest'],
+    tests_require=[
+        'pytest',
+    ],
 
     classifiers=[
         # As in https://pypi.python.org/pypi?:action=list_classifiers
