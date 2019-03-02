@@ -22,7 +22,7 @@ _MISSING = namedtuple('MissingType', [])
 
 class Scopes:
 
-    def __init__(self, params):
+    def __init__(self, params: dict):
         self._scopes = []
         self._keys = ['prefix', 'str_type', 'int_bits', 'int_sign']
         self.push(params)
@@ -54,7 +54,7 @@ class Scopes:
         """
         return self.context(locals())
 
-    def push(self, params):
+    def push(self, params: dict):
 
         scope = {key: params.get(key) for key in self._keys}
         self._scopes.append(scope)
@@ -94,7 +94,7 @@ class Scopes:
         return result
 
     @contextmanager
-    def context(self, params):
+    def context(self, params: dict):
         self.push(params)
         yield self
         self.pop()
@@ -120,11 +120,11 @@ class Library:
     """
 
     def __init__(
-            self, name: str, *, autoload: bool=True,
+            self, name: str, *, autoload: bool = True,
             prefix: Optional[str] = None,
-            str_type: CastedTypeBase=CChars,
-            int_bits: Optional[int]=None,
-            int_sign: Optional[bool]=None
+            str_type: CastedTypeBase = CChars,
+            int_bits: Optional[int] = None,
+            int_sign: Optional[bool] = None
     ):
         """
 
@@ -181,10 +181,10 @@ class Library:
         self.lib = lib
 
     def function(
-            self, name_c: Optional[str]=None, *, wrap: bool=False,
-            str_type: Optional[CastedTypeBase]=None,
-            int_bits: Optional[int]=None,
-            int_sign: Optional[bool]=None
+            self, name_c: Optional[str] = None, *, wrap: bool = False,
+            str_type: Optional[CastedTypeBase] = None,
+            int_bits: Optional[int] = None,
+            int_sign: Optional[bool] = None
     ):
         """Decorator to mark functions which exported from the library.
 
@@ -288,7 +288,7 @@ class Library:
 
         return function_
 
-    def method(self, name_c: Optional[str]=None, **kwargs):
+    def method(self, name_c: Optional[str] = None, **kwargs):
         """Decorator. The same as ``.function()`` with ``wrap=True``."""
         return self.function(name_c=name_c, wrap=True, **kwargs)
 
@@ -396,7 +396,7 @@ class Library:
     #####################################################################################
     # Private
 
-    def _extract_func_info(self, func: Callable, *, name_c: Optional[str]=None, scope: dict=None) -> FuncInfo:
+    def _extract_func_info(self, func: Callable, *, name_c: Optional[str] = None, scope: dict = None) -> FuncInfo:
 
         name_py = func.__name__
         name = scope['prefix'] + (name_c or name_py)
