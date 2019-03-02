@@ -28,7 +28,7 @@ class Scopes:
         self.push(params)
 
     def __call__(
-            self,
+            this,
             prefix: Optional[str] = None,
             str_type: CastedTypeBase = CChars,
             int_bits: Optional[int] = None,
@@ -36,7 +36,7 @@ class Scopes:
             **kwargs) -> 'Scopes':
         """
 
-        :param prefix:
+        :param prefix: Function name prefix to apply to functions under the manager.
 
         :param str_type: Type to represent strings.
 
@@ -52,7 +52,7 @@ class Scopes:
         :param kwargs:
 
         """
-        return self.context(locals())
+        return this.context(locals())
 
     def push(self, params: dict):
 
@@ -132,7 +132,7 @@ class Library:
 
         :param autoload: Load library just on Library object initialization.
 
-        :param prefix: Function name prefix to apply to functions under the manager.
+        :param prefix: Function name prefix to apply to functions in the library.
 
             Useful when C functions have common prefixes.
 
@@ -179,6 +179,43 @@ class Library:
             raise CtypedException('Unable to find library: %s' % name)
 
         self.lib = lib
+
+    def cls(
+            self, *,
+            prefix: Optional[str] = None,
+            str_type: Optional[CastedTypeBase] = None,
+            int_bits: Optional[int] = None,
+            int_sign: Optional[bool] = None,
+    ):
+        """Class decorator. Allows common parameters application for class methods.
+
+        .. code-block:: python
+
+            @lib.cls(prefix='common_', str_type=CCharsW)
+            class Wide:
+
+                @staticmethod
+                @lib.function()
+                def get_utf(some: str) -> str:
+                    ...
+
+        :param prefix: Function name prefix to apply to functions under the manager.
+
+        :param str_type: Type to represent strings.
+
+        :param int_bits: int length to be used in function.
+
+        :param int_sign: Flag. Whether to use signed (True) or unsigned (False) ints.
+
+        """
+        self.scope.push(locals())
+
+        def wrapper(cls_):
+            # Class body construction is done, unwind scope.
+            self.scope.pop()
+            return cls_
+
+        return wrapper
 
     def function(
             self, name_c: Optional[str] = None, *, wrap: bool = False,
@@ -228,10 +265,7 @@ class Library:
             .. note:: Overrides the same named param from library level (see ``__init__`` description).
 
         """
-        locals_ = dict(locals())
-        locals_.pop('self')
-
-        with self.scope(**locals_) as scope:
+        with self.scope(**locals()) as scope:
             scope = scope.flatten()
 
         def cfunc_wrapped(*args, f: Callable, **kwargs):

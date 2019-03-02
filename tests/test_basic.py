@@ -46,9 +46,13 @@ with mylib.scope('f_prefix_one_'):
     def func_str(some: str) -> str:
         ...
 
-    @mylib.f('wchar_p', str_type=CCharsW)
-    def func_str_utf(some: str) -> str:
-        ...
+    @mylib.cls(prefix='wchar_', str_type=CCharsW)
+    class Wide:
+
+        @staticmethod
+        @mylib.f('p')
+        def func_str_utf(some: str) -> str:
+            ...
 
     with mylib.s('prefix_two_'):
 
@@ -105,7 +109,7 @@ def test_with_errno():
 def test_strings():
 
     assert func_str('mind') == 'hereyouare: mind'
-    assert func_str_utf('пример') == 'вот: пример'
+    assert Wide.func_str_utf('пример') == 'вот: пример'
 
 
 def test_no_redeclare():

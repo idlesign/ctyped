@@ -41,6 +41,15 @@ Quickstart
         def get_thing() -> Thing:
             ...
 
+    # Or use may use classes as namespaces.
+    @lib.cls(prefix='common_', str_type=CCharsW)
+    class Wide:
+
+        @staticmethod
+        @lib.function()
+        def get_utf(some: str) -> str:
+            ...
+
     # Bind ctype types to functions available in the library.
     lib.bind_types()
 

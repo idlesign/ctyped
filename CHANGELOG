@@ -2,6 +2,11 @@ ctyped changelog
 ================
 
 
+Unreleased
+----------
++ Added 'Library.cls' decorator for classes.
+
+
 v0.3.0
 ------
 + 'functions_prefix' context manager is replaced by advanced 'scope'.
