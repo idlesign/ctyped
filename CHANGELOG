@@ -4,6 +4,7 @@ ctyped changelog
 
 Unreleased
 ----------
++ 'function/f' and 'method/m' decorators now allow no params (less brackets).
 + Added 'Library.cls' decorator for classes.
 
 

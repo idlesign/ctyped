@@ -6,7 +6,7 @@ from collections import namedtuple
 from contextlib import contextmanager
 from ctypes.util import find_library
 from functools import partial, partialmethod, reduce
-from typing import Any, Optional, Callable
+from typing import Any, Optional, Callable, Union
 
 from .exceptions import FunctionRedeclared, UnsupportedTypeError, TypehintError, CtypedException
 from .types import CChars, CastedTypeBase, CInt8, CInt16, CInt32, CInt64, CInt8U, CInt16U, CInt32U, CInt64U
@@ -218,7 +218,7 @@ class Library:
         return wrapper
 
     def function(
-            self, name_c: Optional[str] = None, *, wrap: bool = False,
+            self, name_c: Union[Optional[str], Callable] = None, *, wrap: bool = False,
             str_type: Optional[CastedTypeBase] = None,
             int_bits: Optional[int] = None,
             int_sign: Optional[bool] = None
@@ -265,9 +265,6 @@ class Library:
             .. note:: Overrides the same named param from library level (see ``__init__`` description).
 
         """
-        with self.scope(**locals()) as scope:
-            scope = scope.flatten()
-
         def cfunc_wrapped(*args, f: Callable, **kwargs):
 
             if not args:
@@ -319,6 +316,16 @@ class Library:
             self.funcs[name] = func_out
 
             return func_out
+
+        if callable(name_c):
+            # Decorator without params.
+            scope = self.scope.flatten()
+            py_func, name_c = name_c, None
+            return function_(py_func)
+
+        # Decorator with parameters.
+        with self.scope(**locals()) as scope:
+            scope = scope.flatten()
 
         return function_
 

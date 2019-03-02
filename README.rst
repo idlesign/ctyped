@@ -42,7 +42,7 @@ Description
     with lib.scope(prefix='mylib_'):
 
         # Describe function available in the library.
-        @lib.function()
+        @lib.function
         def some_func(title: str, year: int) -> str:
             ...
 

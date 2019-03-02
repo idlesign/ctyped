@@ -62,7 +62,7 @@ with mylib.scope('f_prefix_one_'):
 
     class Prober(CInt):
 
-        @mylib.m()
+        @mylib.m
         def probe_add_one(self) -> int:
             ...
 
@@ -71,7 +71,7 @@ with mylib.scope('f_prefix_one_'):
             result = cfunc()
             return result + 1
 
-    @mylib.f()
+    @mylib.f
     def get_prober() -> Prober:
         ...
 
