@@ -110,6 +110,8 @@ def test_basic():
     assert 32 < byref_val < 34
     assert 32 <= byref_val <= 34
 
+    # todo byref array
+
 
 def test_with_errno():
     assert with_errno() == 333

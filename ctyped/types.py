@@ -57,10 +57,13 @@ class CObject(CastedTypeBase):
         return ctypes.c_void_p(obj._ct_val)
 
 
+_int = int  # Aliasing to workaround mypy's "Invalid type "ctyped.types.CRef.int""
+
+
 class CRef(CastedTypeBase):
     """Reference helper."""
 
-    def __init__(self, val):
+    def __init__(self, val: Any):
         self._ct_val = val
 
     @classmethod
@@ -68,8 +71,28 @@ class CRef(CastedTypeBase):
         return ctypes.byref(obj._ct_val)
 
     @classmethod
-    def int(cls, value=0) -> 'CRef':
+    def array(cls, typecls, *, size: int = 1) -> 'CRef':
+
+        if typecls is int:
+            typecls = ctypes.c_int
+
+        elif typecls is str:
+            typecls = ctypes.c_char
+
+        val = (typecls * (size or 1))()
+
+        return cls(val)
+
+    @classmethod
+    def int(cls, value: _int = 0) -> 'CRef':
         return cls(ctypes.c_int(value))
+
+    def __iter__(self):
+        # Allows iteration for arrays.
+        return iter(self._ct_val)
+
+    def __str__(self):
+        return self._ct_val.value.decode('utf-8')
 
     def __int__(self):
         return self._ct_val.value
