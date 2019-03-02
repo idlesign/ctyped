@@ -1,17 +1,17 @@
 import ctypes
-from typing import Callable, Type, Any, Tuple
+from typing import Callable, Type, Any, Tuple, Optional
 
 
 class CastedTypeBase:
 
-    _ct_typ: Type[ctypes._SimpleCData] = None
+    _ct_typ: Optional[Type[ctypes._SimpleCData]] = None
 
     @classmethod
-    def _ct_res(cls, result: ctypes._SimpleCData, func: Callable, args: Tuple):
+    def _ct_res(cls, result: Any, func: Callable, args: Tuple) -> Any:
         raise NotImplementedError
 
     @classmethod
-    def from_param(cls, val: Any):
+    def from_param(cls, val: Any) -> Any:
         raise NotImplementedError
 
 
@@ -41,7 +41,7 @@ class CObject(CastedTypeBase):
     """Helper to represent a C pointer as a link to a Python object."""
 
     _ct_typ = ctypes.c_void_p
-    _ct_val = None  # Object attribute.
+    _ct_val: Any = None  # Object attribute.
 
     @classmethod
     def _ct_res(cls, result: bytes, func: Callable, args: Tuple):

@@ -6,7 +6,7 @@ from collections import namedtuple
 from contextlib import contextmanager
 from ctypes.util import find_library
 from functools import partial, partialmethod, reduce
-from typing import Any, Optional, Callable, Union
+from typing import Any, Optional, Callable, Union, List, Dict, Type, ContextManager
 
 from .exceptions import FunctionRedeclared, UnsupportedTypeError, TypehintError, CtypedException
 from .types import CChars, CastedTypeBase, CInt8, CInt16, CInt32, CInt64, CInt8U, CInt16U, CInt32U, CInt64U
@@ -23,17 +23,17 @@ _MISSING = namedtuple('MissingType', [])
 class Scopes:
 
     def __init__(self, params: dict):
-        self._scopes = []
+        self._scopes: List[Dict] = []
         self._keys = ['prefix', 'str_type', 'int_bits', 'int_sign']
         self.push(params)
 
     def __call__(
             this,
             prefix: Optional[str] = None,
-            str_type: CastedTypeBase = CChars,
+            str_type: Type[CastedTypeBase] = CChars,
             int_bits: Optional[int] = None,
             int_sign: Optional[bool] = None,
-            **kwargs) -> 'Scopes':
+            **kwargs) -> ContextManager['Scopes']:
         """
 
         :param prefix: Function name prefix to apply to functions under the manager.
@@ -122,7 +122,7 @@ class Library:
     def __init__(
             self, name: str, *, autoload: bool = True,
             prefix: Optional[str] = None,
-            str_type: CastedTypeBase = CChars,
+            str_type: Type[CastedTypeBase] = CChars,
             int_bits: Optional[int] = None,
             int_sign: Optional[bool] = None
     ):
@@ -159,7 +159,7 @@ class Library:
 
         self.name = name
         self.lib = None
-        self.funcs = {}
+        self.funcs: Dict[str, Union[Callable, partialmethod[Any]]] = {}
 
         autoload and self.load()
 
@@ -218,11 +218,12 @@ class Library:
         return wrapper
 
     def function(
-            self, name_c: Union[Optional[str], Callable] = None, *, wrap: bool = False,
+            self, name_c: Optional[Union[str, Callable]] = None, *, wrap: bool = False,
             str_type: Optional[CastedTypeBase] = None,
             int_bits: Optional[int] = None,
-            int_sign: Optional[bool] = None
-    ):
+            int_sign: Optional[bool] = None,
+
+    ) -> Callable:
         """Decorator to mark functions which exported from the library.
 
         :param name_c: C function name with or without prefix (see ``.scope(prefix=)``).
@@ -268,16 +269,16 @@ class Library:
         def cfunc_wrapped(*args, f: Callable, **kwargs):
 
             if not args:
-                argvals = inspect.getargvalues(inspect.currentframe().f_back)
+                argvals = inspect.getargvalues(getattr(inspect.currentframe(), 'f_back'))
                 loc = argvals.locals
-                args = [loc[argname] for argname in argvals.args if argname != 'cfunc']
+                args = tuple(loc[argname] for argname in argvals.args if argname != 'cfunc')
 
             return f(*args)
 
         def cfunc_direct(*args, f: Callable, **kwargs):
             return f(*args)
 
-        def function_(func_py: Callable):
+        def function_(func_py: Callable, *, name_c: Optional[str], scope: dict):
 
             info = self._extract_func_info(func_py, name_c=name_c, scope=scope)
             name = info.name_c
@@ -304,7 +305,7 @@ class Library:
 
                     func_swapped = partialmethod(cfunc_direct, f=func_c)
 
-                func_swapped.cfunc = func_c
+                setattr(func_swapped, 'cfunc', func_c)
                 func_out = func_swapped
 
             else:
@@ -321,13 +322,13 @@ class Library:
             # Decorator without params.
             scope = self.scope.flatten()
             py_func, name_c = name_c, None
-            return function_(py_func)
+            return function_(py_func, name_c=name_c, scope=scope)
 
         # Decorator with parameters.
         with self.scope(**locals()) as scope:
             scope = scope.flatten()
 
-        return function_
+        return partial(function_, name_c=name_c, scope=scope)
 
     def method(self, name_c: Optional[str] = None, **kwargs):
         """Decorator. The same as ``.function()`` with ``wrap=True``."""
@@ -342,7 +343,7 @@ class Library:
         LOGGER.debug('Binding signature types to ctypes functions ...')
 
         def thint_str_to_obj(thint: str):
-            fback = inspect.currentframe().f_back
+            fback = getattr(inspect.currentframe(), 'f_back')
 
             while fback:
                 target = fback.f_globals.get(thint)
@@ -385,7 +386,8 @@ class Library:
                     32: (CInt32, CInt32U),
                     64: (CInt64, CInt64U),
 
-                }.get(int_bits)[type_idx] or thint
+                }
+                thint = thint.get(int_bits)[type_idx] or thint
 
             return thint
 
@@ -437,7 +439,7 @@ class Library:
     #####################################################################################
     # Private
 
-    def _extract_func_info(self, func: Callable, *, name_c: Optional[str] = None, scope: dict = None) -> FuncInfo:
+    def _extract_func_info(self, func: Callable, *, name_c: Optional[str], scope: dict) -> FuncInfo:
 
         name_py = func.__name__
         name = scope['prefix'] + (name_c or name_py)
