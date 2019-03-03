@@ -81,6 +81,10 @@ class CRef(CastedTypeBase):
         return cls(val)
 
     @classmethod
+    def cbool(cls, value: bool = False) -> 'CRef':
+        return cls(ctypes.c_bool(value))
+
+    @classmethod
     def cint(cls, value: int = 0) -> 'CRef':
         return cls(ctypes.c_int(value))
 
@@ -92,6 +96,9 @@ class CRef(CastedTypeBase):
         return self._ct_val.value.decode('utf-8')
 
     def __int__(self):
+        return self._ct_val.value
+
+    def __bool__(self):
         return self._ct_val.value
 
     def __eq__(self, other):
