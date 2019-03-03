@@ -367,10 +367,13 @@ class Library:
                         'Unable to resolve type hint. Function: %s. Arg: %s. Type: %s. ' %
                         (name_py, name, thint_orig))
 
-            if thint is str:
+            if thint is bool:
+                thint = ctypes.c_bool
+
+            elif thint is str:
                 thint = func_info.options['str_type']
 
-            if thint is int:
+            elif thint is int:
                 int_bits = func_info.options['int_bits']
                 int_sign = func_info.options['int_sign']
 

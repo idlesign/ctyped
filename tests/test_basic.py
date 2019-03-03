@@ -43,6 +43,10 @@ with mylib.scope('f_prefix_one_'):
     def byref_int(val: CRef) -> None:
         ...
 
+    @mylib.f
+    def bool_to_bool(val: bool) -> bool:
+        ...
+
     @mylib.function(int_bits=8, int_sign=False)
     def uint8_add(val: int) -> int:
         ...
@@ -93,6 +97,8 @@ def test_basic():
     assert func_2() == 2
     assert func_prefix_two_3() == 3
     assert uint8_add(4) == 5
+    assert not bool_to_bool(True)
+    assert bool_to_bool(False)
 
     prober = get_prober()
     assert isinstance(prober, Prober)

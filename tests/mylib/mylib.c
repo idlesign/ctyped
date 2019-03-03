@@ -1,12 +1,12 @@
-#include <stdio.h>
-#include <time.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <time.h>
 #include <string.h>
-#include <errno.h>
 #include <wchar.h>
 #include <locale.h>
-
+#include <errno.h>
 
 int buggy1() {
     return 777;
@@ -62,6 +62,11 @@ int f_prefix_one_probe_add_two(int val) {
 
 void f_prefix_one_byref_int(int * val) {
     *val = 33;
+}
+
+
+bool f_prefix_one_bool_to_bool(bool val) {
+    return !val;
 }
 
 
