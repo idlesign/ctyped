@@ -88,6 +88,10 @@ class CRef(CastedTypeBase):
     def cint(cls, value: int = 0) -> 'CRef':
         return cls(ctypes.c_int(value))
 
+    @classmethod
+    def cfloat(cls, value: float = 0.0) -> 'CRef':
+        return cls(ctypes.c_float(value))
+
     def __iter__(self):
         # Allows iteration for arrays.
         return iter(self._ct_val)
@@ -96,6 +100,9 @@ class CRef(CastedTypeBase):
         return self._ct_val.value.decode('utf-8')
 
     def __int__(self):
+        return self._ct_val.value
+
+    def __float__(self):
         return self._ct_val.value
 
     def __bool__(self):

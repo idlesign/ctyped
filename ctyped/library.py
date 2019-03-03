@@ -370,6 +370,9 @@ class Library:
             if thint is bool:
                 thint = ctypes.c_bool
 
+            elif thint is float:
+                thint = ctypes.c_float
+
             elif thint is str:
                 thint = func_info.options['str_type']
 

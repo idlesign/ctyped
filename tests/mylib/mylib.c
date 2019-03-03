@@ -70,6 +70,11 @@ bool f_prefix_one_bool_to_bool(bool val) {
 }
 
 
+float f_prefix_one_float_to_float(float val) {
+    return val;
+}
+
+
 uint8_t f_prefix_one_uint8_add(uint8_t val) {
     return val + 1;
 }

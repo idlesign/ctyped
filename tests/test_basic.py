@@ -47,6 +47,10 @@ with mylib.scope('f_prefix_one_'):
     def bool_to_bool(val: bool) -> bool:
         ...
 
+    @mylib.f
+    def float_to_float(val: float) -> float:
+        ...
+
     @mylib.function(int_bits=8, int_sign=False)
     def uint8_add(val: int) -> int:
         ...
@@ -99,6 +103,9 @@ def test_basic():
     assert uint8_add(4) == 5
     assert not bool_to_bool(True)
     assert bool_to_bool(False)
+
+    float_ = 1.3
+    assert float_to_float(float_) == pytest.approx(float_)
 
     prober = get_prober()
     assert isinstance(prober, Prober)
