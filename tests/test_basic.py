@@ -108,7 +108,7 @@ def test_basic():
     assert prober.probe_add_one() == prober_val + 1
     assert prober.probe_add_three() == prober_val + 3
 
-    byref_val = CRef.int()
+    byref_val = CRef.cint()
     assert byref_int(byref_val) is None
     assert int(byref_val) == 33
     assert byref_val == 33
