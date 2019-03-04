@@ -2,6 +2,11 @@ ctyped changelog
 ================
 
 
+Unreleased
+----------
+* Class methods performance improved (less wrappers).
+
+
 v0.5.0
 ------
 + Added 'CRef' helper to pass by reference in arguments.

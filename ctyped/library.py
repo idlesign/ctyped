@@ -275,9 +275,6 @@ class Library:
 
             return f(*args)
 
-        def cfunc_direct(*args, f: Callable, **kwargs):
-            return f(*args)
-
         def function_(func_py: Callable, *, name_c: Optional[str], scope: dict):
 
             info = self._extract_func_info(func_py, name_c=name_c, scope=scope)
@@ -299,11 +296,11 @@ class Library:
                     func_swapped = partialmethod(func_py, cfunc=partial(cfunc_wrapped, f=func_c))
 
                 else:
-                    # Use automatic function.
+                    # Automatically bind first param (self, cls)
 
                     LOGGER.debug('Func [ %s -> %s ] uses wrapped auto call.', name, info.name_py)
 
-                    func_swapped = partialmethod(cfunc_direct, f=func_c)
+                    func_swapped = partialmethod(func_c)
 
                 setattr(func_swapped, 'cfunc', func_c)
                 func_out = func_swapped
