@@ -124,6 +124,10 @@ def c_callback(use_errno: bool = False) -> Callable:
 
     .. code-block:: python
 
+        @lib.f
+        def c_func_using_callback(hook: CPointer) -> int:
+            ...
+
         @c_callback
         def hook(num: int) -> int:
             return num + 10
