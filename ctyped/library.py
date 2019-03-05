@@ -2,22 +2,16 @@ import ctypes
 import inspect
 import logging
 import os
-from collections import namedtuple
 from contextlib import contextmanager
 from ctypes.util import find_library
 from functools import partial, partialmethod, reduce
 from typing import Any, Optional, Callable, Union, List, Dict, Type, ContextManager
 
-from .exceptions import FunctionRedeclared, UnsupportedTypeError, TypehintError, CtypedException
-from .types import CChars, CastedTypeBase, CInt8, CInt16, CInt32, CInt64, CInt8U, CInt16U, CInt32U, CInt64U
+from .exceptions import UnsupportedTypeError, TypehintError, CtypedException
+from .types import CChars, CastedTypeBase
+from .utils import cast_type, extract_func_info, FuncInfo
 
 LOGGER = logging.getLogger(__name__)
-
-
-FuncInfo = namedtuple('FuncInfo', ['name_py', 'name_c', 'annotations', 'options'])
-
-
-_MISSING = namedtuple('MissingType', [])
 
 
 class Scopes:
@@ -277,7 +271,7 @@ class Library:
 
         def function_(func_py: Callable, *, name_c: Optional[str], scope: dict):
 
-            info = self._extract_func_info(func_py, name_c=name_c, scope=scope)
+            info = extract_func_info(func_py, name_c=name_c, scope=scope, registry=self.funcs)
             name = info.name_c
 
             func_c = getattr(self.lib, name)
@@ -335,64 +329,8 @@ class Library:
         """Deduces ctypes argument and result types from Python type hints,
         binding those types to ctypes functions.
 
-
         """
         LOGGER.debug('Binding signature types to ctypes functions ...')
-
-        def thint_str_to_obj(thint: str):
-            fback = getattr(inspect.currentframe(), 'f_back')
-
-            while fback:
-                target = fback.f_globals.get(thint)
-
-                if target:
-                    return target
-
-                fback = fback.f_back
-
-        def cast_type(name: str, thint: Any):
-
-            if thint is None:
-                return None
-
-            if isinstance(thint, str):
-                thint_orig = thint
-                thint = thint_str_to_obj(thint)
-
-                if thint is None:
-                    raise TypehintError(
-                        'Unable to resolve type hint. Function: %s. Arg: %s. Type: %s. ' %
-                        (name_py, name, thint_orig))
-
-            if thint is bool:
-                thint = ctypes.c_bool
-
-            elif thint is float:
-                thint = ctypes.c_float
-
-            elif thint is str:
-                thint = func_info.options['str_type']
-
-            elif thint is int:
-                int_bits = func_info.options['int_bits']
-                int_sign = func_info.options['int_sign']
-
-                if int_bits:
-                    assert int_bits in {8, 16, 32, 64}, 'Wrong value passed for int_bits.'
-
-                type_idx = 1 if int_sign is False else 0
-
-                thint = {
-
-                    8: (CInt8, CInt8U),
-                    16: (CInt16, CInt16U),
-                    32: (CInt32, CInt32U),
-                    64: (CInt64, CInt64U),
-
-                }
-                thint = thint.get(int_bits)[type_idx] or thint
-
-            return thint
 
         for name_c, func_out in self.funcs.items():
 
@@ -405,13 +343,13 @@ class Library:
 
             try:
                 return_is_annotated = 'return' in annotations
-                restype = cast_type('return', annotations.pop('return', None))
+                restype = cast_type(func_info, 'return', annotations.pop('return', None))
 
                 if restype and issubclass(restype, CastedTypeBase):
                     errcheck = restype._ct_res
                     restype = restype._ct_typ
 
-                argtypes = [cast_type(argname, argtype) for argname, argtype in annotations.items()]
+                argtypes = [cast_type(func_info, argname, argtype) for argname, argtype in annotations.items()]
 
             except TypehintError:
                 # Reset annotations to allow subsequent .bind_types() calls w/o exceptions.
@@ -439,35 +377,3 @@ class Library:
 
     f = function
     m = method
-
-    #####################################################################################
-    # Private
-
-    def _extract_func_info(self, func: Callable, *, name_c: Optional[str], scope: dict) -> FuncInfo:
-
-        name_py = func.__name__
-        name = scope['prefix'] + (name_c or name_py)
-
-        if name in self.funcs:
-            raise FunctionRedeclared('Unable to redeclare: %s (%s)' % (name, name_py))
-
-        annotated_args = {}
-        annotations = func.__annotations__
-
-        # Gather all args and annotations for them.
-        for argname in inspect.getfullargspec(func).args:
-
-            if argname == 'cfunc':
-                continue
-
-            annotation = annotations.get(argname, _MISSING)
-
-            if argname == 'self' and annotation is _MISSING:
-                # Pick class name from qualname.
-                annotation = func.__qualname__.split('.')[-2]
-
-            annotated_args[argname] = annotation
-
-        annotated_args['return'] = annotations.get('return')
-
-        return FuncInfo(name_py=name_py, name_c=name, annotations=annotated_args, options=scope)
