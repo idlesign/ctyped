@@ -31,3 +31,4 @@ Table of Contents
 
     quickstart
     library
+    utils
