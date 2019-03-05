@@ -75,6 +75,14 @@ float f_prefix_one_float_to_float(float val) {
 }
 
 
+typedef int (*callback) (int num);
+
+
+int f_prefix_one_backcaller(callback hook) {
+    return hook(33);
+}
+
+
 uint8_t f_prefix_one_uint8_add(uint8_t val) {
     return val + 1;
 }

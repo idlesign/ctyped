@@ -113,3 +113,37 @@ def get_last_error() -> Tuple[int, str, str]:
     msg = strerror(num)
 
     return num, code, msg
+
+
+def c_callback(use_errno: bool = False) -> Callable:
+    """Decorator to turn a Python function into a C callback function.
+
+    .. code-block:: python
+
+        @c_callback()
+        def hook(num: int) -> int:
+            return num + 10
+
+        assert backcaller(hook) == 43
+
+    :param use_errno:
+
+    """
+    def cfunction_(func: Callable) -> Callable:
+
+        func_info = extract_func_info(func, name_c=None, scope={}, registry={})
+        annotations = func_info.annotations
+
+        restype = cast_type(func_info, 'return', annotations.pop('return', None))
+        argtypes = [cast_type(func_info, argname, argtype) for argname, argtype in annotations.items()]
+
+        functype = CFUNCTYPE(restype, *argtypes, use_errno=use_errno)
+        cfunc = functype(func)
+
+        return cfunc
+
+    if callable(use_errno):
+        # Decorator without params.
+        return cfunction_(use_errno)
+
+    return cfunction_

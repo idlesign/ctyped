@@ -5,8 +5,8 @@ import pytest
 
 from ctypes import c_int
 from ctyped.exceptions import FunctionRedeclared, TypehintError, UnsupportedTypeError
-from ctyped.toolbox import Library, get_last_error
-from ctyped.types import CInt, CCharsW, CRef
+from ctyped.toolbox import Library, get_last_error, c_callback
+from ctyped.types import CInt, CCharsW, CRef, CPointer
 
 ############################################################
 # Library interface
@@ -37,6 +37,10 @@ with mylib.scope('f_prefix_one_'):
 
     @mylib.function()
     def func_2() -> int:
+        ...
+
+    @mylib.f
+    def backcaller(val: CPointer) -> int:
         ...
 
     @mylib.f
@@ -173,3 +177,12 @@ def test_unsupported_type():
         mylib.bind_types()
 
     assert 'buggy2 (buggy2)' in str(e.value)
+
+
+def test_callback():
+
+    @c_callback
+    def hook(num: int) -> int:
+        return num + 10
+
+    assert backcaller(hook) == 43
