@@ -105,6 +105,8 @@ def cast_type(func_info, argname: str, thint: Any):
 def get_last_error() -> Tuple[int, str, str]:
     """Returns last error (``errno``) information tuple:
 
+    .. code-block:: python
+
         (err_no, err_code, err_message)
 
     """
@@ -120,11 +122,11 @@ def c_callback(use_errno: bool = False) -> Callable:
 
     .. code-block:: python
 
-        @c_callback()
+        @c_callback
         def hook(num: int) -> int:
             return num + 10
 
-        assert backcaller(hook) == 43
+        c_func_using_callback(hook)
 
     :param use_errno:
 
