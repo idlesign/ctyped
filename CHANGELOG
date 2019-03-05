@@ -4,6 +4,7 @@ ctyped changelog
 
 Unreleased
 ----------
++ 'get_last_error()' now returns ErrorInfo named tuple.
 + Basic support for callback functions.
 * Class methods performance improved (less wrappers).
 

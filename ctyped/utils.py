@@ -8,6 +8,8 @@ from .exceptions import TypehintError, FunctionRedeclared
 from .types import *
 
 FuncInfo = namedtuple('FuncInfo', ['name_py', 'name_c', 'annotations', 'options'])
+ErrorInfo = namedtuple('ErrorInfo', ['num', 'code', 'msg'])
+
 _MISSING = namedtuple('MissingType', [])
 
 
@@ -102,8 +104,8 @@ def cast_type(func_info, argname: str, thint: Any):
     return thint
 
 
-def get_last_error() -> Tuple[int, str, str]:
-    """Returns last error (``errno``) information tuple:
+def get_last_error() -> ErrorInfo:
+    """Returns last error (``errno``) information named tuple:
 
     .. code-block:: python
 
@@ -114,7 +116,7 @@ def get_last_error() -> Tuple[int, str, str]:
     code = errorcode[num]
     msg = strerror(num)
 
-    return num, code, msg
+    return ErrorInfo(num=num, code=code, msg=msg)
 
 
 def c_callback(use_errno: bool = False) -> Callable:

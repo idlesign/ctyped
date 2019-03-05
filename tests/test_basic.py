@@ -132,10 +132,10 @@ def test_basic():
 
 def test_with_errno():
     assert with_errno() == 333
-    err_num, err_code, err_msg = get_last_error()
-    assert err_num == 2
-    assert err_code == 'ENOENT'
-    assert 'such file' in err_msg
+    err = get_last_error()
+    assert err.num == 2
+    assert err.code == 'ENOENT'
+    assert 'such file' in err.msg
 
 
 def test_strings():
