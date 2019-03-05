@@ -97,7 +97,7 @@ def cast_type(func_info, argname: str, thint: Any):
 
         type_idx = 1 if int_sign is False else 0
 
-        thint = thint_map.get(int_bits)[type_idx] or thint
+        thint = thint_map[int_bits][type_idx] or thint
 
     return thint
 
