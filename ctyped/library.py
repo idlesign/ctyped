@@ -376,4 +376,10 @@ class Library:
     # Shortcuts
 
     f = function
+    """Shortcut for ``.function()``."""
+    
     m = method
+    """Shortcut for ``.method()``."""
+    
+    s = None
+    """Shortcut for ``.scope()``."""
