@@ -8,14 +8,14 @@ Quickstart
     from ctyped.toolbox import Library
     from ctyped.types import CInt
 
-    # Define library.
+    # Define a library.
     lib = Library('mylib.so')
 
     # Type less with function names prefixes.
     with lib.scope(prefix='mylib_'):
 
         # Describe function available in the library.
-        @lib.function
+        @lib.function(name='otherfunc')
         def some_func(title: str, year: int) -> str:
             ...
 
@@ -32,16 +32,15 @@ Quickstart
                 @lib.method
                 def two(self, some:int, cfunc: Callable) -> int:
                     # `cfunc` is a wrapper, calling an actual ctypes function.
-                    # If no arguments provided the wrapper will try detect them
-                    # automatically.
                     result = cfunc()
+                    # If no arguments, the wrapper will try to detect them automatically.
                     return result + 1
 
         @lib.function
         def get_thing() -> Thing:
             ...
 
-    # Or use may use classes as namespaces.
+    # Or you may use classes as namespaces.
     @lib.cls(prefix='common_', str_type=CCharsW)
     class Wide:
 
@@ -54,9 +53,11 @@ Quickstart
     lib.bind_types()
 
     # Call function from the library.
-    result_string = some_func('Hello!', 2019)
+    result_string = some_func('Hello!', 2019)  # Call ``mylib_otherfunc``
+    result_wide = Wide.get_utf('some')  # Call ``common_get_utf``
 
     thing = get_thing()
 
     thing.one(12)  # Call ``mylib_mylib_grouped_one``.
     thing.two(13)  # Call ``mylib_mylib_grouped_two``
+
