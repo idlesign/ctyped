@@ -1,10 +1,8 @@
 import ctypes
-from typing import Callable, Type, Any, Tuple, Optional
+from typing import Callable, Any, Tuple, Optional
 
 
 class CastedTypeBase:
-
-    _ct_typ: Optional[Type[ctypes._SimpleCData]] = None
 
     @classmethod
     def _ct_res(cls, result: Any, func: Callable, args: Tuple) -> Any:  # pragma: nocover
@@ -37,18 +35,17 @@ CInt64U: int = getattr(ctypes, 'c_uint64')
 CPointer: Any = getattr(ctypes, 'c_void_p')
 
 
-class CObject(CastedTypeBase):
+class CObject(CastedTypeBase, ctypes.c_void_p):
     """Helper to represent a C pointer as a link to a Python object."""
 
-    _ct_typ = ctypes.c_void_p
     _ct_val: Any = None  # Object attribute.
 
     @classmethod
-    def _ct_res(cls, result: bytes, func: Callable, args: Tuple):
+    def _ct_res(cls, result: 'CObject', func: Callable, args: Tuple):
 
         obj = cls()
         # todo The following binding may be too late when __init__ depends on it.
-        obj._ct_val = result
+        obj._ct_val = result.value
 
         return obj
 
@@ -127,28 +124,29 @@ class CRef(CastedTypeBase):
         return self._ct_val.value >= other
 
 
-class CChars(CastedTypeBase):
+class CChars(CastedTypeBase, ctypes.c_char_p):
     """Represents a Python string as a C chars pointer."""
 
-    _ct_typ = ctypes.c_char_p
-
     @classmethod
-    def _ct_res(cls, result: bytes, func: Callable, args: Tuple):
-        return result.decode('utf-8')
+    def _ct_res(cls, result: 'CChars', func: Callable, args: Tuple) -> Optional[str]:
+        value = result.value
+
+        if not value:
+            return ''
+
+        return value.decode('utf-8')
 
     @classmethod
     def from_param(cls, val: str):
         return ctypes.c_char_p(val.encode('utf-8'))
 
 
-class CCharsW(CastedTypeBase):
+class CCharsW(CastedTypeBase, ctypes.c_wchar_p):
     """Represents a Python string as a C wide chars pointer."""
 
-    _ct_typ = ctypes.c_wchar_p
-
     @classmethod
-    def _ct_res(cls, result: bytes, func: Callable, args: Tuple):
-        return result
+    def _ct_res(cls, result: 'CCharsW', func: Callable, args: Tuple) -> Optional[str]:
+        return result.value
 
     @classmethod
     def from_param(cls, val: str):

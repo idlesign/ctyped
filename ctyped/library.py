@@ -347,7 +347,6 @@ class Library:
 
                 if restype and issubclass(restype, CastedTypeBase):
                     errcheck = restype._ct_res
-                    restype = restype._ct_typ
 
                 argtypes = [cast_type(func_info, argname, argtype) for argname, argtype in annotations.items()]
 
@@ -381,5 +380,5 @@ class Library:
     m = method
     """Shortcut for ``.method()``."""
     
-    s = None
+    s = None  # type: ignore
     """Shortcut for ``.scope()``."""
