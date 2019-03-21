@@ -65,6 +65,8 @@ class CRef(CastedTypeBase):
 
             int: ctypes.c_int,
             str: ctypes.c_char,
+            bool: ctypes.c_bool,
+            float: ctypes.c_float,
 
         }.get(typecls, typecls)
 

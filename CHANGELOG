@@ -2,6 +2,11 @@ ctyped changelog
 ================
 
 
+Unreleased
+----------
++ CRef.carray() constructor now allows shortcuts for bool and float.
+
+
 v0.6.0
 ------
 + 'get_last_error()' now returns ErrorInfo named tuple.
