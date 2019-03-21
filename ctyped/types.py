@@ -5,7 +5,7 @@ from typing import Callable, Any, Tuple, Optional
 class CastedTypeBase:
 
     @classmethod
-    def _ct_res(cls, result: Any, func: Callable, args: Tuple) -> Any:  # pragma: nocover
+    def _ct_res(cls, cobj: Any, *args, **kwargs) -> Any:  # pragma: nocover
         raise NotImplementedError
 
     @classmethod
@@ -41,11 +41,11 @@ class CObject(CastedTypeBase, ctypes.c_void_p):
     _ct_val: Any = None  # Object attribute.
 
     @classmethod
-    def _ct_res(cls, result: 'CObject', func: Callable, args: Tuple):
+    def _ct_res(cls, cobj: 'CObject', *args, **kwargs):
 
         obj = cls()
         # todo The following binding may be too late when __init__ depends on it.
-        obj._ct_val = result.value
+        obj._ct_val = cobj.value
 
         return obj
 
@@ -57,21 +57,16 @@ class CObject(CastedTypeBase, ctypes.c_void_p):
 class CRef(CastedTypeBase):
     """Reference helper."""
 
-    def __init__(self, val: Any):
-        self._ct_val = val
-
     @classmethod
-    def from_param(cls, obj: 'CRef'):
-        return ctypes.byref(obj._ct_val)
+    def carray(cls, typecls: Any, *, size: int = 1) -> 'CRef':
+        """Alternative constructor. Creates a reference to array."""
 
-    @classmethod
-    def carray(cls, typecls, *, size: int = 1) -> 'CRef':
+        typecls = {
 
-        if typecls is int:
-            typecls = ctypes.c_int
+            int: ctypes.c_int,
+            str: ctypes.c_char,
 
-        elif typecls is str:
-            typecls = ctypes.c_char
+        }.get(typecls, typecls)
 
         val = (typecls * (size or 1))()
 
@@ -79,15 +74,25 @@ class CRef(CastedTypeBase):
 
     @classmethod
     def cbool(cls, value: bool = False) -> 'CRef':
+        """Alternative constructor. Creates a reference to boolean."""
         return cls(ctypes.c_bool(value))
 
     @classmethod
     def cint(cls, value: int = 0) -> 'CRef':
+        """Alternative constructor. Creates a reference to integer."""
         return cls(ctypes.c_int(value))
 
     @classmethod
     def cfloat(cls, value: float = 0.0) -> 'CRef':
+        """Alternative constructor. Creates a reference to float."""
         return cls(ctypes.c_float(value))
+
+    @classmethod
+    def from_param(cls, obj: 'CRef'):
+        return ctypes.byref(obj._ct_val)
+
+    def __init__(self, cval: Any):
+        self._ct_val = cval
 
     def __iter__(self):
         # Allows iteration for arrays.
@@ -128,8 +133,8 @@ class CChars(CastedTypeBase, ctypes.c_char_p):
     """Represents a Python string as a C chars pointer."""
 
     @classmethod
-    def _ct_res(cls, result: 'CChars', func: Callable, args: Tuple) -> Optional[str]:
-        value = result.value
+    def _ct_res(cls, cobj: 'CChars', *args, **kwargs) -> Optional[str]:
+        value = cobj.value
 
         if not value:
             return ''
@@ -145,8 +150,8 @@ class CCharsW(CastedTypeBase, ctypes.c_wchar_p):
     """Represents a Python string as a C wide chars pointer."""
 
     @classmethod
-    def _ct_res(cls, result: 'CCharsW', func: Callable, args: Tuple) -> Optional[str]:
-        return result.value
+    def _ct_res(cls, cobj: 'CCharsW', *args, **kwargs) -> Optional[str]:
+        return cobj.value
 
     @classmethod
     def from_param(cls, val: str):
