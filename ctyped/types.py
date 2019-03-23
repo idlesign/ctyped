@@ -38,20 +38,13 @@ CPointer: Any = getattr(ctypes, 'c_void_p')
 class CObject(CastedTypeBase, ctypes.c_void_p):
     """Helper to represent a C pointer as a link to a Python object."""
 
-    _ct_val: Any = None  # Object attribute.
-
     @classmethod
     def _ct_res(cls, cobj: 'CObject', *args, **kwargs):
-
-        obj = cls()
-        # todo The following binding may be too late when __init__ depends on it.
-        obj._ct_val = cobj.value
-
-        return obj
+        return cobj
 
     @classmethod
     def from_param(cls, obj: 'CObject'):
-        return ctypes.c_void_p(obj._ct_val)
+        return obj
 
 
 class CRef(CastedTypeBase):

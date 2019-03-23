@@ -5,6 +5,7 @@ ctyped changelog
 Unreleased
 ----------
 + CRef.carray() constructor now allows shortcuts for bool and float.
+* CObject simplified.
 
 
 v0.6.0
