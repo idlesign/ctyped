@@ -8,7 +8,7 @@ from functools import partial, partialmethod, reduce
 from typing import Any, Optional, Callable, Union, List, Dict, Type, ContextManager
 
 from .exceptions import UnsupportedTypeError, TypehintError, CtypedException
-from .types import CChars, CastedTypeBase
+from .types import CChars, CastedTypeBase, CStruct
 from .utils import cast_type, extract_func_info, FuncInfo
 
 LOGGER = logging.getLogger(__name__)
@@ -173,6 +173,81 @@ class Library:
             raise CtypedException('Unable to find library: %s' % name)
 
         self.lib = lib
+
+    def structure(
+            self, *,
+            pack: Optional[int] = None,
+            str_type: Optional[CastedTypeBase] = None,
+            int_bits: Optional[int] = None,
+            int_sign: Optional[bool] = None,
+    ):
+        """Class decorator for C structures definition.
+
+        .. code-block:: python
+
+            @lib.structure
+            class MyStruct:
+
+                first: int
+                second: str
+                third: 'MyStruct'
+
+        :param pack: Allows custom maximum alignment for the fields (as #pragma pack(n)).
+
+        :param str_type: Type to represent strings.
+
+        :param int_bits: int length to be used in function.
+
+        :param int_sign: Flag. Whether to use signed (True) or unsigned (False) ints.
+
+        """
+        params = locals()
+
+        def wrapper(cls_):
+
+            annotations = {
+                attrname: attrhint for attrname, attrhint in cls_.__annotations__.items()
+                if not attrname.startswith('_')}
+
+            with self.scope(**params):
+
+                cls_name = cls_.__name__
+
+                info = FuncInfo(
+                    name_py=cls_name, name_c=None,
+                    annotations=annotations, options=self.scope.flatten())
+
+                # todo maybe support big/little byte order
+                struct = type(cls_name, (CStruct, cls_), {})
+
+                ct_fields = {}
+                fields = []
+
+                for attrname, attrhint in annotations.items():
+
+                    if attrhint == cls_name:
+                        casted = ctypes.POINTER(struct)
+                        ct_fields[attrname] = struct
+
+                    else:
+                        casted = cast_type(info, attrname, attrhint)
+
+                        if issubclass(casted, CastedTypeBase):
+                            ct_fields[attrname] = casted
+
+                    fields.append((attrname, casted))
+
+                LOGGER.debug('Structure %s fields: %s', cls_name, fields)
+
+                if pack:
+                    struct._pack_ = pack
+
+                struct._ct_fields = ct_fields
+                struct._fields_ = fields
+
+            return struct
+
+        return wrapper
 
     def cls(
             self, *,

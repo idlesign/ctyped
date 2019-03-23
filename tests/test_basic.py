@@ -1,9 +1,8 @@
-import os
 import faulthandler
+import os
 
 import pytest
 
-from ctypes import c_int
 from ctyped.exceptions import FunctionRedeclared, TypehintError, UnsupportedTypeError
 from ctyped.toolbox import Library, get_last_error, c_callback
 from ctyped.types import CInt, CCharsW, CRef, CPointer
@@ -17,6 +16,18 @@ faulthandler.enable()
 MYLIB_PATH = os.path.join(os.path.dirname(__file__), 'mylib', 'mylib.so')
 
 mylib = Library(MYLIB_PATH, int_bits=32)
+
+
+@mylib.structure(int_bits=8, pack=16)
+class MyStruct:
+
+    _hidden: 'dummy'
+    first: int
+    second: str
+    third: 'MyStruct'
+
+    def get_additional(self):
+        return 10
 
 
 @mylib.f()
@@ -41,6 +52,10 @@ with mylib.scope('f_prefix_one_'):
 
     @mylib.f
     def backcaller(val: CPointer) -> int:
+        ...
+
+    @mylib.f
+    def handle_mystruct(val: MyStruct) -> MyStruct:
         ...
 
     @mylib.f
@@ -186,3 +201,20 @@ def test_callback():
         return num + 10
 
     assert backcaller(hook) == 43
+
+
+def test_struct():
+
+    struct = MyStruct(first=2, second='any', third=MyStruct(first=10))
+
+    assert struct.get_additional() == 10  # verify method is copied
+
+    result = handle_mystruct(struct)
+    assert result.first == 4
+    assert result.second == 'anything'
+    assert '%s' % result.second == 'anything'
+    assert result.second
+
+    result.second = ''
+    assert not result.second
+    assert result.third.first == 15

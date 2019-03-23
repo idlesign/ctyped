@@ -38,19 +38,25 @@ Description
     # Define library.
     lib = Library('mylib.so')
 
+    @lib.structure
+    class Box:
+
+        one: int
+        two: str
+
     # Type less with function names prefixes.
     with lib.scope(prefix='mylib_'):
 
         # Describe function available in the library.
         @lib.function
-        def some_func(title: str, year: int) -> str:
+        def some_func(title: str, year: int, box: Box) -> str:
             ...
 
     # Bind ctype types to functions available in the library.
     lib.bind_types()
 
-    # Call function from the library.
-    result_string = some_func('Hello!', 2019)
+    # Call library function.
+    result_string = some_func('Hello!', 2019, Box(one=35, two='dummy'))
 
 
 Read the documentation for more information.

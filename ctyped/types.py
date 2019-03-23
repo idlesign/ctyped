@@ -1,16 +1,23 @@
 import ctypes
-from typing import Callable, Any, Tuple, Optional
+from typing import Any, Optional, Union
 
 
 class CastedTypeBase:
 
     @classmethod
-    def _ct_res(cls, cobj: Any, *args, **kwargs) -> Any:  # pragma: nocover
-        raise NotImplementedError
+    def _ct_prep(cls, val: Any) -> Union[bytes, int]:
+        # Prepare value. Used for structure fields.
+        return val
 
     @classmethod
-    def from_param(cls, val: Any) -> Any:  # pragma: nocover
-        raise NotImplementedError
+    def _ct_res(cls, cobj: Any, *args, **kwargs) -> Any:  # pragma: nocover
+        # Function result caster.
+        raise NotImplementedError('%s._ct_res() is not implemented' % cls.__name__)
+
+    @classmethod
+    def from_param(cls, val: Any) -> Any:
+        # Function parameter caster.
+        return val
 
 
 # getattr to cheat type hints
@@ -33,6 +40,48 @@ CInt64: int = getattr(ctypes, 'c_int64')
 CInt64U: int = getattr(ctypes, 'c_uint64')
 
 CPointer: Any = getattr(ctypes, 'c_void_p')
+
+
+class CStruct(CastedTypeBase, ctypes.Structure):
+    """Helper to represent a structure using native byte order."""
+
+    @classmethod
+    def _ct_prep(cls, val):
+        return ctypes.pointer(val)
+
+    @classmethod
+    def _ct_res(cls, cobj: Any, *args, **kwargs) -> Any:
+
+        if isinstance(cobj, cls):
+            # Structure as a function result.
+            return cobj
+
+        # Substructure handling.
+        return cobj.contents
+
+    def __setattr__(self, key, value):
+        # Allows structure field value casting on assignments.
+
+        casted = self._ct_fields.get(key)
+
+        if casted:
+            value = casted._ct_prep(value)
+
+        super().__setattr__(key, value)
+
+    def __getattribute__(self, key):
+        # Allows customizes structure members types handling.
+
+        get = super().__getattribute__
+
+        value = get(key)
+
+        casted = get('_ct_fields').get(key)
+
+        if casted:
+            return casted._ct_res(value)
+
+        return value
 
 
 class CObject(CastedTypeBase, ctypes.c_void_p):
@@ -128,6 +177,10 @@ class CChars(CastedTypeBase, ctypes.c_char_p):
     """Represents a Python string as a C chars pointer."""
 
     @classmethod
+    def _ct_prep(cls, val):
+        return val.encode('utf-8')
+
+    @classmethod
     def _ct_res(cls, cobj: 'CChars', *args, **kwargs) -> Optional[str]:
         value = cobj.value
 
@@ -146,7 +199,7 @@ class CCharsW(CastedTypeBase, ctypes.c_wchar_p):
 
     @classmethod
     def _ct_res(cls, cobj: 'CCharsW', *args, **kwargs) -> Optional[str]:
-        return cobj.value
+        return cobj.value or ''
 
     @classmethod
     def from_param(cls, val: str):

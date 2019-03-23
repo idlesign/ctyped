@@ -3,6 +3,7 @@ from collections import namedtuple
 from ctypes import get_errno, CFUNCTYPE
 from errno import errorcode
 from os import strerror
+from typing import Callable
 
 from .exceptions import TypehintError, FunctionRedeclared
 from .types import *

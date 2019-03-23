@@ -107,3 +107,28 @@ const wchar_t * f_prefix_one_wchar_p(wchar_t* val) {
 
     return out;
 }
+
+
+typedef struct MyStruct {
+
+   uint8_t one;
+   char * two;
+   struct MyStruct * next;
+
+} mystruct_t;
+
+
+mystruct_t f_prefix_one_handle_mystruct(mystruct_t val) {
+    val.one += 2;
+    val.next->one += 5;
+
+    char prefix[] = "thing";
+
+    char *out = malloc(sizeof(char) * (strlen(prefix) + strlen(val.two) + 1 ));
+    strcpy(out, val.two);
+    strcat(out, prefix);
+
+    val.two = out;
+
+    return val;
+}
