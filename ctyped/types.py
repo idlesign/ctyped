@@ -40,6 +40,7 @@ CInt64: int = getattr(ctypes, 'c_int64')
 CInt64U: int = getattr(ctypes, 'c_uint64')
 
 CPointer: Any = getattr(ctypes, 'c_void_p')
+CObject = CPointer  # Mere alias for those who prefer ``class My(CObject): ...`` better.
 
 
 class CStruct(CastedTypeBase, ctypes.Structure):
@@ -82,18 +83,6 @@ class CStruct(CastedTypeBase, ctypes.Structure):
             return casted._ct_res(value)
 
         return value
-
-
-class CObject(CastedTypeBase, ctypes.c_void_p):
-    """Helper to represent a C pointer as a link to a Python object."""
-
-    @classmethod
-    def _ct_res(cls, cobj: 'CObject', *args, **kwargs):
-        return cobj
-
-    @classmethod
-    def from_param(cls, obj: 'CObject'):
-        return obj
 
 
 class CRef(CastedTypeBase):
