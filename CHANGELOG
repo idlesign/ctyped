@@ -2,8 +2,8 @@ ctyped changelog
 ================
 
 
-Unreleased
-----------
+v0.7.0
+------
 + Added basic structures support.
 + CRef.carray() constructor now allows shortcuts for bool and float.
 * CObject simplified.
