@@ -17,9 +17,6 @@ https://github.com/idlesign/ctyped
     :target: https://coveralls.io/r/idlesign/ctyped
 
 
-**Work in progress. Stay tuned.**
-
-
 Description
 -----------
 
