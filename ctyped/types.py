@@ -143,16 +143,21 @@ class CRef(CastedTypeBase):
         return iter(self._ct_val)
 
     def __str__(self):
-        return self._ct_val.value.decode('utf-8')
+        val = self._ct_val.value
+
+        if isinstance(val, bytes):
+            val = val.decode('utf-8')
+
+        return str(val)
 
     def __int__(self):
-        return self._ct_val.value
+        return int(self._ct_val.value)
 
     def __float__(self):
-        return self._ct_val.value
+        return float(self._ct_val.value)
 
     def __bool__(self):
-        return self._ct_val.value
+        return bool(self._ct_val.value)
 
     def __eq__(self, other):
         return self._ct_val.value == other

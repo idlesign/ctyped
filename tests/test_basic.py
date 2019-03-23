@@ -141,8 +141,15 @@ def test_basic():
     assert byref_val != 34
     assert 32 < byref_val < 34
     assert 32 <= byref_val <= 34
+    assert byref_val
+    assert float(byref_val) == pytest.approx(float(33))
+    assert str(byref_val) == '33'
 
-    # todo byref array
+
+def test_cref_instantiation():
+    assert isinstance(CRef.carray(bool, size=10), CRef)
+    assert isinstance(CRef.cbool(True), CRef)
+    assert isinstance(CRef.cfloat(10.25), CRef)
 
 
 def test_with_errno():
