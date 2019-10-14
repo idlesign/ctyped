@@ -20,7 +20,7 @@ def extract_func_info(func: Callable, *, name_c: Optional[str], scope: dict, reg
     name = scope.get('prefix', '') + (name_c or name_py)
 
     if name in registry:
-        raise FunctionRedeclared('Unable to redeclare: %s (%s)' % (name, name_py))
+        raise FunctionRedeclared(f'Unable to redeclare: {name} ({name_py})')
 
     annotated_args = {}
     annotations = func.__annotations__
@@ -68,8 +68,8 @@ def cast_type(func_info, argname: str, thint: Any):
 
         if thint is None:
             raise TypehintError(
-                'Unable to resolve type hint. Function: %s. Arg: %s. Type: %s. ' %
-                (func_info.name_py, argname, thint_orig))
+                f'Unable to resolve type hint. '
+                f'Function: {func_info.name_py}. Arg: {argname}. Type: {thint_orig}.')
 
     if thint is bool:
         thint = ctypes.c_bool

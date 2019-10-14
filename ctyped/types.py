@@ -12,7 +12,7 @@ class CastedTypeBase:
     @classmethod
     def _ct_res(cls, cobj: Any, *args, **kwargs) -> Any:  # pragma: nocover
         # Function result caster.
-        raise NotImplementedError('%s._ct_res() is not implemented' % cls.__name__)
+        raise NotImplementedError(f'{cls.__name__}._ct_res() is not implemented')
 
     @classmethod
     def from_param(cls, val: Any) -> Any:

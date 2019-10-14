@@ -237,7 +237,7 @@ class Library:
 
                     fields.append((attrname, casted))
 
-                LOGGER.debug('Structure %s fields: %s', cls_name, fields)
+                LOGGER.debug(f'Structure {cls_name} fields: {fields}')
 
                 if pack:
                     struct._pack_ = pack
@@ -360,14 +360,14 @@ class Library:
                 if 'cfunc' in func_args:
                     # Use existing function, pass `cfunc`.
 
-                    LOGGER.debug('Func [ %s -> %s ] uses wrapped manual call.', name, info.name_py)
+                    LOGGER.debug(f'Func [ {name} -> {info.name_py} ] uses wrapped manual call.')
 
                     func_swapped = partialmethod(func_py, cfunc=partial(cfunc_wrapped, f=func_c))
 
                 else:
                     # Automatically bind first param (self, cls)
 
-                    LOGGER.debug('Func [ %s -> %s ] uses wrapped auto call.', name, info.name_py)
+                    LOGGER.debug(f'Func [ {name} -> {info.name_py} ] uses wrapped auto call.')
 
                     func_swapped = partialmethod(func_c)
 
@@ -376,7 +376,7 @@ class Library:
 
             else:
 
-                LOGGER.debug('Func [ %s -> %s ] uses direct call.' % (name, info.name_py))
+                LOGGER.debug(f'Func [ {name} -> {info.name_py} ] uses direct call.')
 
                 func_out = func_c
 
@@ -443,8 +443,9 @@ class Library:
             except TypeError as e:
 
                 raise UnsupportedTypeError(
-                    'Unsupported types declared for %s (%s). Args: %s. Result: %s. Errcheck: %s.' %
-                    (name_py, name_c, argtypes, restype, errcheck)) from e
+                    f'Unsupported types declared for {name_py} ({name_c}). '
+                    f'Args: {argtypes}. Result: {restype}. Errcheck: {errcheck}.'
+                ) from e
 
     #####################################################################################
     # Shortcuts
