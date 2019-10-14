@@ -162,6 +162,7 @@ class Library:
         name = self.name
 
         if not os.path.exists(name):
+            name = name.replace('lib', '', 1)
             name = find_library(name)
 
         lib = ctypes.CDLL(name, use_errno=True)

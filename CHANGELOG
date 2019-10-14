@@ -4,6 +4,7 @@ ctyped changelog
 
 Unreleased
 ----------
+* Fixed 'Library.load()' LD search.
 * Fixed 'Unable to find library' message.
 
 
