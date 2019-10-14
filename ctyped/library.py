@@ -170,7 +170,7 @@ class Library:
             lib = None
 
         if lib is None:
-            raise CtypedException('Unable to find library: %s' % name)
+            raise CtypedException(f'Unable to find library: {name or self.name}')
 
         self.lib = lib
 
