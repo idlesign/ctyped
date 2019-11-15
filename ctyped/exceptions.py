@@ -14,3 +14,7 @@ class UnsupportedTypeError(CtypedException):
 
 class TypehintError(CtypedException):
     """"""
+
+
+class SniffingError(CtypedException):
+    """"""
