@@ -1,5 +1,5 @@
 import faulthandler
-import os
+from pathlib import Path
 
 import pytest
 
@@ -13,7 +13,7 @@ from ctyped.types import CInt, CCharsW, CRef, CPointer
 # Watch for crashes.
 faulthandler.enable()
 
-MYLIB_PATH = os.path.join(os.path.dirname(__file__), 'mylib', 'mylib.so')
+MYLIB_PATH = Path(__file__).parent / 'mylib' / 'mylib.so'
 
 mylib = Library(MYLIB_PATH, int_bits=32)
 

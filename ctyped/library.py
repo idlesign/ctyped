@@ -5,6 +5,7 @@ import os
 from contextlib import contextmanager
 from ctypes.util import find_library
 from functools import partial, partialmethod, reduce
+from pathlib import Path
 from typing import Any, Optional, Callable, Union, List, Dict, Type, ContextManager
 
 from .exceptions import UnsupportedTypeError, TypehintError, CtypedException
@@ -114,7 +115,7 @@ class Library:
     """
 
     def __init__(
-            self, name: str, *, autoload: bool = True,
+            self, name: Union[str, Path], *, autoload: bool = True,
             prefix: Optional[str] = None,
             str_type: Type[CastedTypeBase] = CChars,
             int_bits: Optional[int] = None,
@@ -151,7 +152,7 @@ class Library:
         self.scope = Scopes(locals())
         self.s = self.scope
 
-        self.name = name
+        self.name = str(name)
         self.lib = None
         self.funcs: Dict[str, Union[Callable, partialmethod[Any]]] = {}
 
