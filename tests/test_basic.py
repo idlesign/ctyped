@@ -114,6 +114,14 @@ mylib.bind_types()
 # Tests
 
 
+def test_sniff():
+    result = mylib.sniff()
+    dumped = result.to_ctyped()
+    assert "mylib.so')" in dumped
+    assert 'def buggy1():' in dumped
+    assert 'bind_types()' in dumped
+
+
 def test_basic():
     assert f_noprefix_1() == -10
     assert function_one() == 1

@@ -26,6 +26,7 @@ Description
 
 * Less boilerplate;
 * Logical structuring;
+* Basic code generator (.so function -> ctyped function);
 * Useful helpers.
 
 .. code-block:: python

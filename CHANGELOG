@@ -4,6 +4,7 @@ ctyped changelog
 
 Unreleased
 ----------
++ Added .so sniffing with ctyped code generation support.
 + Library now can handle Path objects.
 
 

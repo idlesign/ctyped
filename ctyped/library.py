@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any, Optional, Callable, Union, List, Dict, Type, ContextManager
 
 from .exceptions import UnsupportedTypeError, TypehintError, CtypedException
+from .sniffer import NmSymbolSniffer, SniffResult
 from .types import CChars, CastedTypeBase, CStruct
 from .utils import cast_type, extract_func_info, FuncInfo
 
@@ -401,6 +402,16 @@ class Library:
     def method(self, name_c: Optional[str] = None, **kwargs):
         """Decorator. The same as ``.function()`` with ``wrap=True``."""
         return self.function(name_c=name_c, wrap=True, **kwargs)
+
+    def sniff(self) -> SniffResult:
+        """Sniffs the library for symbols.
+
+        Sniffing result can be used as 'ctyped' code generator.
+
+        """
+        sniffer = NmSymbolSniffer(self.lib._name)
+        result = sniffer.sniff()
+        return result
 
     def bind_types(self):
         """Deduces ctypes argument and result types from Python type hints,
