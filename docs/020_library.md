@@ -1,6 +1,4 @@
-Library
-=======
+# Library
 
-
-.. automodule:: ctyped.library
-   :members:
+::: apidescribed: ctyped.library
+    inherited: false

@@ -1,60 +1,44 @@
-ctyped changelog
-================
+# ctyped changelog
 
+### Unreleased
+* ** Fixed missing Optional import in utils (import error on Python <3.14).
 
-v0.8.0 [2019-11-21]
--------------------
-+ Added .so sniffing with ctyped code generation support.
-+ Library now can handle Path objects.
+### v0.8.0 [2019-11-21]
+* ++ Added .so sniffing with ctyped code generation support.
+* ++ Library now can handle Path objects.
 
+### v0.7.1 [2019-10-14]
+* ** Fixed 'Library.load()' LD search.
+* ** Fixed 'Unable to find library' message.
 
-v0.7.1 [2019-10-14]
--------------------
-* Fixed 'Library.load()' LD search.
-* Fixed 'Unable to find library' message.
+### v0.7.0
+* ++ Added basic structures support.
+* ++ CRef.carray() constructor now allows shortcuts for bool and float.
+* ** CObject simplified.
 
+### v0.6.0
+* ++ 'get_last_error()' now returns ErrorInfo named tuple.
+* ++ Basic support for callback functions.
+* ** Class methods performance improved (less wrappers).
 
-v0.7.0
-------
-+ Added basic structures support.
-+ CRef.carray() constructor now allows shortcuts for bool and float.
-* CObject simplified.
+### v0.5.0
+* ++ Added 'CRef' helper to pass by reference in arguments.
+* ++ Now '-> None' annotation can be used for 'void' result.
+* ++ Proper 'bool' handling.
 
+### v0.4.0
+* ++ 'function/f' and 'method/m' decorators now allow no params (less brackets).
+* ++ Added 'Library.cls' decorator for classes.
 
-v0.6.0
-------
-+ 'get_last_error()' now returns ErrorInfo named tuple.
-+ Basic support for callback functions.
-* Class methods performance improved (less wrappers).
+### v0.3.0
+* ++ 'functions_prefix' context manager is replaced by advanced 'scope'.
 
+### v0.2.0
+* ++ Added 'int_bits' shortcut option.
+* ++ Added 'int_sign' shortcut option.
+* ++ Added CObject convenience.
+* ++ Added support for Python strings as wide chars.
+* ** Result is now casted with 'errcheck'.
 
-v0.5.0
-------
-+ Added 'CRef' helper to pass by reference in arguments.
-+ Now '-> None' annotation can be used for 'void' result.
-+ Proper 'bool' handling.
-
-
-v0.4.0
-------
-+ 'function/f' and 'method/m' decorators now allow no params (less brackets).
-+ Added 'Library.cls' decorator for classes.
-
-
-v0.3.0
-------
-+ 'functions_prefix' context manager is replaced by advanced 'scope'.
-
-
-v0.2.0
-------
-+ Added 'int_bits' shortcut option.
-+ Added 'int_sign' shortcut option.
-+ Added CObject convenience.
-+ Added support for Python strings as wide chars.
-* Result is now casted with 'errcheck'.
-
-
-v0.1.0
-------
-+ Basic functionality.
+### v0.1.0
+* ++ Basic functionality.

@@ -1,31 +1,25 @@
-ctyped installation
-===================
+# ctyped installation
 
+Python `pip` package is required to install `ctyped`.
 
-Python ``pip`` package is required to install ``ctyped``.
+## From sources
 
+Use the following command line to install `ctyped` from sources directory (containing `pyproject.toml`):
 
-From sources
-------------
+```shell
+pip install .
+```
 
-Use the following command line to install ``ctyped`` from sources directory (containing setup.py):
+## From PyPI
 
-    pip install .
+Alternatively you can install `ctyped` from PyPI:
 
-or
-
-    python setup.py install
-
-
-From PyPI
----------
-
-Alternatively you can install ``ctyped`` from PyPI:
-
-    pip install ctyped
-
+```shell
+pip install ctyped
+```
 
 Use `-U` flag for upgrade:
 
-    pip install -U ctyped
-
+```shell
+pip install -U ctyped
+```

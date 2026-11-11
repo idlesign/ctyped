@@ -1,12 +1,11 @@
 import ctypes
 import inspect
 import logging
-import os
 from contextlib import contextmanager
 from ctypes.util import find_library
 from functools import partial, partialmethod, reduce
 from pathlib import Path
-from typing import Any, Optional, Callable, Union, List, Dict, Type, ContextManager
+from typing import Any, Callable, Union, List, Dict, Type, ContextManager
 
 from .exceptions import UnsupportedTypeError, TypehintError, CtypedException
 from .sniffer import NmSymbolSniffer, SniffResult
@@ -19,16 +18,16 @@ LOGGER = logging.getLogger(__name__)
 class Scopes:
 
     def __init__(self, params: dict):
-        self._scopes: List[Dict] = []
+        self._scopes: list[dict] = []
         self._keys = ['prefix', 'str_type', 'int_bits', 'int_sign']
         self.push(params)
 
     def __call__(
             this,
-            prefix: Optional[str] = None,
-            str_type: Type[CastedTypeBase] = CChars,
-            int_bits: Optional[int] = None,
-            int_sign: Optional[bool] = None,
+            prefix: str | None = None,
+            str_type: type[CastedTypeBase] = CChars,
+            int_bits: int | None = None,
+            int_sign: bool | None = None,
             **kwargs) -> ContextManager['Scopes']:
         """
 
@@ -117,10 +116,10 @@ class Library:
 
     def __init__(
             self, name: Union[str, Path], *, autoload: bool = True,
-            prefix: Optional[str] = None,
-            str_type: Type[CastedTypeBase] = CChars,
-            int_bits: Optional[int] = None,
-            int_sign: Optional[bool] = None
+            prefix: str | None = None,
+            str_type: type[CastedTypeBase] = CChars,
+            int_bits: int | None = None,
+            int_sign: bool | None = None
     ):
         """
 
@@ -155,7 +154,7 @@ class Library:
 
         self.name = str(name)
         self.lib = None
-        self.funcs: Dict[str, Union[Callable, partialmethod[Any]]] = {}
+        self.funcs: dict[str, Union[Callable, partialmethod[Any]]] = {}
 
         autoload and self.load()
 
@@ -163,7 +162,7 @@ class Library:
         """Loads shared library."""
         name = self.name
 
-        if not os.path.exists(name):
+        if not Path(name).exists():
             name = name.replace('lib', '', 1)
             name = find_library(name)
 
@@ -179,10 +178,10 @@ class Library:
 
     def structure(
             self, *,
-            pack: Optional[int] = None,
-            str_type: Optional[CastedTypeBase] = None,
-            int_bits: Optional[int] = None,
-            int_sign: Optional[bool] = None,
+            pack: int | None = None,
+            str_type: CastedTypeBase | None = None,
+            int_bits: int | None = None,
+            int_sign: bool | None = None,
     ):
         """Class decorator for C structures definition.
 
@@ -240,7 +239,7 @@ class Library:
 
                     fields.append((attrname, casted))
 
-                LOGGER.debug(f'Structure {cls_name} fields: {fields}')
+                LOGGER.debug('Structure %s fields: %s', cls_name, fields)
 
                 if pack:
                     struct._pack_ = pack
@@ -254,10 +253,10 @@ class Library:
 
     def cls(
             self, *,
-            prefix: Optional[str] = None,
-            str_type: Optional[CastedTypeBase] = None,
-            int_bits: Optional[int] = None,
-            int_sign: Optional[bool] = None,
+            prefix: str | None = None,
+            str_type: CastedTypeBase | None = None,
+            int_bits: int | None = None,
+            int_sign: bool | None = None,
     ):
         """Class decorator. Allows common parameters application for class methods.
 
@@ -290,10 +289,10 @@ class Library:
         return wrapper
 
     def function(
-            self, name_c: Optional[Union[str, Callable]] = None, *, wrap: bool = False,
-            str_type: Optional[CastedTypeBase] = None,
-            int_bits: Optional[int] = None,
-            int_sign: Optional[bool] = None,
+            self, name_c: Union[str, Callable] | None = None, *, wrap: bool = False,
+            str_type: CastedTypeBase | None = None,
+            int_bits: int | None = None,
+            int_sign: bool | None = None,
 
     ) -> Callable:
         """Decorator to mark functions which exported from the library.
@@ -341,13 +340,13 @@ class Library:
         def cfunc_wrapped(*args, f: Callable, **kwargs):
 
             if not args:
-                argvals = inspect.getargvalues(getattr(inspect.currentframe(), 'f_back'))
+                argvals = inspect.getargvalues(inspect.currentframe().f_back)
                 loc = argvals.locals
                 args = tuple(loc[argname] for argname in argvals.args if argname != 'cfunc')
 
             return f(*args)
 
-        def function_(func_py: Callable, *, name_c: Optional[str], scope: dict):
+        def function_(func_py: Callable, *, name_c: str | None, scope: dict):
 
             info = extract_func_info(func_py, name_c=name_c, scope=scope, registry=self.funcs)
             name = info.name_c
@@ -363,23 +362,23 @@ class Library:
                 if 'cfunc' in func_args:
                     # Use existing function, pass `cfunc`.
 
-                    LOGGER.debug(f'Func [ {name} -> {info.name_py} ] uses wrapped manual call.')
+                    LOGGER.debug('Func [ %s -> %s ] uses wrapped manual call.', name, info.name_py)
 
                     func_swapped = partialmethod(func_py, cfunc=partial(cfunc_wrapped, f=func_c))
 
                 else:
                     # Automatically bind first param (self, cls)
 
-                    LOGGER.debug(f'Func [ {name} -> {info.name_py} ] uses wrapped auto call.')
+                    LOGGER.debug('Func [ %s -> %s ] uses wrapped auto call.', name, info.name_py)
 
                     func_swapped = partialmethod(func_c)
 
-                setattr(func_swapped, 'cfunc', func_c)
+                func_swapped.cfunc = func_c
                 func_out = func_swapped
 
             else:
 
-                LOGGER.debug(f'Func [ {name} -> {info.name_py} ] uses direct call.')
+                LOGGER.debug('Func [ %s -> %s ] uses direct call.', name, info.name_py)
 
                 func_out = func_c
 
@@ -399,7 +398,7 @@ class Library:
 
         return partial(function_, name_c=name_c, scope=scope)
 
-    def method(self, name_c: Optional[str] = None, **kwargs):
+    def method(self, name_c: str | None = None, **kwargs):
         """Decorator. The same as ``.function()`` with ``wrap=True``."""
         return self.function(name_c=name_c, wrap=True, **kwargs)
 

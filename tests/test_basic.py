@@ -197,7 +197,8 @@ def test_unresolved_typehint():
 
 def test_unsupported_type():
 
-    class SomeType: pass
+    class SomeType:
+        pass
 
     @mylib.f()
     def buggy2(one: SomeType) -> int:
@@ -227,7 +228,7 @@ def test_struct():
     result = handle_mystruct(struct)
     assert result.first == 4
     assert result.second == 'anything'
-    assert '%s' % result.second == 'anything'
+    assert f'{result.second}' == 'anything'
     assert result.second
 
     result.second = ''

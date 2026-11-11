@@ -1,5 +1,5 @@
 import ctypes
-from typing import Any, Optional, Union
+from typing import Any, Union
 
 
 class CastedTypeBase:
@@ -21,25 +21,25 @@ class CastedTypeBase:
 
 
 # getattr to cheat type hints
-CShort: int = getattr(ctypes, 'c_short')
-CShortU: int = getattr(ctypes, 'c_ushort')
-CLong: int = getattr(ctypes, 'c_long')
-CLongU: int = getattr(ctypes, 'c_ulong')
-CLongLong: int = getattr(ctypes, 'c_longlong')
-CLongLongU: int = getattr(ctypes, 'c_ulonglong')
+CShort: int = ctypes.c_short
+CShortU: int = ctypes.c_ushort
+CLong: int = ctypes.c_long
+CLongU: int = ctypes.c_ulong
+CLongLong: int = ctypes.c_longlong
+CLongLongU: int = ctypes.c_ulonglong
 
-CInt: int = getattr(ctypes, 'c_int')
-CIntU: int = getattr(ctypes, 'c_uint')
-CInt8: int = getattr(ctypes, 'c_int8')
-CInt8U: int = getattr(ctypes, 'c_uint8')
-CInt16: int = getattr(ctypes, 'c_int16')
-CInt16U: int = getattr(ctypes, 'c_uint16')
-CInt32: int = getattr(ctypes, 'c_int32')
-CInt32U: int = getattr(ctypes, 'c_uint32')
-CInt64: int = getattr(ctypes, 'c_int64')
-CInt64U: int = getattr(ctypes, 'c_uint64')
+CInt: int = ctypes.c_int
+CIntU: int = ctypes.c_uint
+CInt8: int = ctypes.c_int8
+CInt8U: int = ctypes.c_uint8
+CInt16: int = ctypes.c_int16
+CInt16U: int = ctypes.c_uint16
+CInt32: int = ctypes.c_int32
+CInt32U: int = ctypes.c_uint32
+CInt64: int = ctypes.c_int64
+CInt64U: int = ctypes.c_uint64
 
-CPointer: Any = getattr(ctypes, 'c_void_p')
+CPointer: Any = ctypes.c_void_p
 CObject = CPointer  # Mere alias for those who prefer ``class My(CObject): ...`` better.
 
 
@@ -175,7 +175,7 @@ class CChars(CastedTypeBase, ctypes.c_char_p):
         return val.encode('utf-8')
 
     @classmethod
-    def _ct_res(cls, cobj: 'CChars', *args, **kwargs) -> Optional[str]:
+    def _ct_res(cls, cobj: 'CChars', *args, **kwargs) -> str | None:
         value = cobj.value
 
         if not value:
@@ -192,7 +192,7 @@ class CCharsW(CastedTypeBase, ctypes.c_wchar_p):
     """Represents a Python string as a C wide chars pointer."""
 
     @classmethod
-    def _ct_res(cls, cobj: 'CCharsW', *args, **kwargs) -> Optional[str]:
+    def _ct_res(cls, cobj: 'CCharsW', *args, **kwargs) -> str | None:
         return cobj.value or ''
 
     @classmethod

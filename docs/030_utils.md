@@ -1,6 +1,4 @@
-Utils
-=====
+# Utils
 
-
-.. automodule:: ctyped.utils
-   :members:
+::: apidescribed: ctyped.utils
+    inherited: false

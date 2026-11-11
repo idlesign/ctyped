@@ -1,5 +1,5 @@
 import subprocess
-from collections import namedtuple
+from typing import NamedTuple
 from datetime import datetime
 from pathlib import Path
 from textwrap import dedent
@@ -8,7 +8,10 @@ from typing import List, Union
 from .exceptions import SniffingError
 
 
-SniffedSymbol = namedtuple('SniffedSymbol', ['name', 'address', 'line'])
+class SniffedSymbol(NamedTuple):
+    name: str
+    address: str
+    line: str
 """Represents a symbol sniffed from a library."""
 
 
@@ -16,7 +19,7 @@ class SniffResult:
     """Represents a library sniffing results."""
 
     def __init__(self, *, libpath: str):
-        self.symbols: List[SniffedSymbol] = []
+        self.symbols: list[SniffedSymbol] = []
         self.libpath = libpath
 
     def add_symbol(self, symbol: SniffedSymbol):
@@ -35,14 +38,13 @@ class SniffResult:
             ''
         ]
 
-        for symbol in self.symbols:
-            dumped.append(dedent(
+        dumped.extend(dedent(
                 f'''
                 @lib.f
                 def {symbol.name}():
                     """{symbol.line}"""
                 '''
-            ))
+            ) for symbol in self.symbols)
 
         dumped.append('\nlib.bind_types()')
 
@@ -60,27 +62,26 @@ class NmSymbolSniffer:
         """
         self.libpath = str(libpath)
 
-    def _run(self) -> List[str]:
+    def _run(self) -> list[str]:
 
         try:
             result = subprocess.run(
                 ['nm', '-DCl', self.libpath],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+                capture_output=True,
             )
 
         except FileNotFoundError:  # pragma: nocover
 
             raise SniffingError(
                 "Command 'nm' execution failed. "
-                "Make sure 'nm' command from 'binutils' package is available.")
+                "Make sure 'nm' command from 'binutils' package is available.") from None
 
         if result.returncode:  # pragma: nocover
             raise SniffingError(f"Command 'nm' execution failed: {result.stderr.decode()}")
 
         return result.stdout.decode().splitlines()
 
-    def _get_symbols(self, lines: List[str]) -> List[SniffedSymbol]:
+    def _get_symbols(self, lines: list[str]) -> list[SniffedSymbol]:
 
         symbols = []
 

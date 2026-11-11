@@ -1,18 +1,7 @@
-ctyped authors
-==============
+# ctyped authors
 
 Created by Igor `idle sign` Starikov.
 
-
-Contributors
-------------
+## Contributors
 
 Here could be your name.
-
-
-
-Translators
------------
-
-Here could be your name.
-

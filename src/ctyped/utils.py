@@ -1,20 +1,34 @@
 import inspect
-from collections import namedtuple
+from typing import NamedTuple
 from ctypes import get_errno, CFUNCTYPE
 from errno import errorcode
 from os import strerror
-from typing import Callable
+from typing import Callable, Optional
 
 from .exceptions import TypehintError, FunctionRedeclared
 from .types import *
 
-FuncInfo = namedtuple('FuncInfo', ['name_py', 'name_c', 'annotations', 'options'])
-ErrorInfo = namedtuple('ErrorInfo', ['num', 'code', 'msg'])
+class FuncInfo(NamedTuple):
+    name_py: str
+    name_c: str
+    annotations: dict
+    options: dict
 
-_MISSING = namedtuple('MissingType', [])
+
+class ErrorInfo(NamedTuple):
+    num: int
+    code: int
+    msg: str
 
 
-def extract_func_info(func: Callable, *, name_c: Optional[str], scope: dict, registry: dict) -> FuncInfo:
+class _Missing(NamedTuple):
+    pass
+
+
+_MISSING = _Missing()
+
+
+def extract_func_info(func: Callable, *, name_c: str | None, scope: dict, registry: dict) -> FuncInfo:
 
     name_py = func.__name__
     name = scope.get('prefix', '') + (name_c or name_py)
@@ -46,7 +60,7 @@ def extract_func_info(func: Callable, *, name_c: Optional[str], scope: dict, reg
 
 def thint_str_to_obj(thint: str):
 
-    fback = getattr(inspect.currentframe(), 'f_back')
+    fback = inspect.currentframe().f_back
 
     while fback:
         target = fback.f_globals.get(thint)
