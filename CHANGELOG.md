@@ -1,6 +1,6 @@
 # ctyped changelog
 
-### Unreleased
+### v0.8.1 [2026-11-14]
 * ** Fixed missing Optional import in utils (import error on Python <3.14).
 
 ### v0.8.0 [2019-11-21]
