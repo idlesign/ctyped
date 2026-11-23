@@ -177,6 +177,34 @@ def raises(exc: type[Exception], *, ok: Any = 0, describe: Union[Callable[[Any],
     return raises_
 
 
+def check_errno(*, on: Any = -1, exc: type[Exception] = OSError) -> Callable:
+    """Returns an errcheck callable raising the given exception
+    with errno information when a function result is equal
+    to the given sentinel value.
+
+    .. code-block:: python
+
+        @lib.f(errcheck=check_errno())
+        def write(fd: int, buf: bytes, count: CSizeT) -> CSSizeT:
+            ...
+
+    :param on: Sentinel result value indicating an error.
+        Use None for NULL-returning functions.
+
+    :param exc: Exception class to raise. Is called with (errno, message).
+
+    """
+    def check_errno_(result, func, args):
+
+        if result != on:
+            return result
+
+        err = get_last_error()
+        raise exc(err.num, err.msg)
+
+    return check_errno_
+
+
 def c_callback(use_errno: bool = False) -> Callable:
     """Decorator to turn a Python function into a C callback function.
 

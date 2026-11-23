@@ -7,6 +7,7 @@
 * !! Changed string results (CChars/CCharsW): a NULL pointer from C now produces None instead of an empty string.
 * ++ Added 'bytes' type hint support: raw binary data as C chars pointer (no UTF-8 encoding).
 * ++ Added CFloat and CDouble type hints.
+* ++ Added check_errno() errcheck helper turning C errno failures into exceptions (OSError by default).
 * ++ Added CSizeT and CSSizeT type hints (C 'size_t' and 'ssize_t').
 * ++ Added raises() errcheck helper and 'errcheck' parameter for .function()/.method() decorators.
 * ** Cleaned up ctyped.utils imports (no more star import).
