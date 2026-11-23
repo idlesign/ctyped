@@ -8,6 +8,7 @@
 * ++ Added 'bytes' type hint support: raw binary data as C chars pointer (no UTF-8 encoding).
 * ++ Added CFloat and CDouble type hints.
 * ++ Added CSizeT and CSSizeT type hints (C 'size_t' and 'ssize_t').
+* ++ Added raises() errcheck helper and 'errcheck' parameter for .function()/.method() decorators.
 * ** Cleaned up ctyped.utils imports (no more star import).
 * ** CRef is now explicitly unhashable since the referenced value may change from C side.
 * ** Fixed get_last_error() raising KeyError on unknown errno values; ErrorInfo.code is None in that case.

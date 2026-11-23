@@ -296,6 +296,7 @@ class Library:
             str_type: CastedTypeBase | None = None,
             int_bits: int | None = None,
             int_sign: bool | None = None,
+            errcheck: Callable | None = None,
 
     ) -> Callable:
         """Decorator to mark functions which exported from the library.
@@ -306,6 +307,12 @@ class Library:
 
         :param name_c: C function name with or without prefix (see ``.scope(prefix=)``).
             If not set, Python function name is used.
+
+        :param errcheck: Callable to check the function result, e.g.
+            produced by ``raises()`` or ``check_errno()`` helpers.
+
+            If the result type has its own casting (e.g. ``str``),
+            the check is applied to the casted value.
 
         :param wrap: Do not replace decorated function with ctypes function,
             but with wrapper, allowing pre- or post-process ctypes function call.
@@ -403,6 +410,8 @@ class Library:
         with self.scope(**locals()) as scope:
             scope = scope.flatten()
 
+        scope['errcheck'] = errcheck
+
         return partial(function_, name_c=name_c, scope=scope)
 
     def method(self, name_c: str | None = None, **kwargs):
@@ -433,13 +442,13 @@ class Library:
 
             name_py = func_info.name_py
             annotations = func_info.annotations
-            errcheck = None
+            errcheck_cast = None
 
             try:
                 restype = cast_type(func_info, 'return', annotations.get('return'))
 
                 if restype and issubclass(restype, CastedTypeBase):
-                    errcheck = restype._ct_res
+                    errcheck_cast = restype._ct_res
 
                 argtypes = [
                     cast_type(func_info, argname, argtype)
@@ -449,6 +458,20 @@ class Library:
                 # Reset annotations to allow subsequent .bind_types() calls w/o exceptions.
                 func_info.annotations.clear()
                 raise
+
+            errcheck = errcheck_cast
+            errcheck_user = func_info.options.get('errcheck')
+
+            if errcheck_user:
+
+                if errcheck_cast:
+
+                    def errcheck(result, func, args, *, cast=errcheck_cast, user=errcheck_user):
+                        # User check is applied to an already casted value.
+                        return user(cast(result, func, args), func, args)
+
+                else:
+                    errcheck = errcheck_user
 
             try:
                 if argtypes:

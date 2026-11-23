@@ -1,16 +1,21 @@
+import ctypes
 import gzip
 import zlib
 from ctypes.util import find_library
 
 import pytest
 
-from ctyped.toolbox import Library
+from ctyped.toolbox import Library, raises
 from ctyped.types import CIntU, CLongU, CPointer, CRef
 
 if find_library('z') is None:
     pytest.skip('libz is not available', allow_module_level=True)
 
 zlib_lib = Library('z')
+
+
+class ZlibError(Exception):
+    """zlib call failed."""
 
 
 @zlib_lib.f
@@ -48,6 +53,16 @@ def gzclose(file: CPointer) -> int:
     ...
 
 
+@zlib_lib.f
+def zError(errcode: int) -> str:
+    ...
+
+
+@zlib_lib.f(errcheck=raises(ZlibError, describe=zError))
+def compress2(dest: CRef, dest_len: CRef, source: bytes, source_len: CLongU, level: int) -> int:
+    ...
+
+
 zlib_lib.bind_types()
 
 
@@ -66,6 +81,40 @@ def test_checksums():
 
 def test_compress_bound():
     assert compressBound(100) > 100
+
+
+def test_raises():
+
+    data = b'some data'
+    bound = int(compressBound(len(data)))
+
+    dest = CRef.carray(str, size=bound)
+    dest_len = CRef(ctypes.c_ulong(bound))
+
+    assert compress2(dest, dest_len, data, len(data), 9) == 0
+
+    dest_small = CRef.carray(str, size=2)
+    dest_len_small = CRef(ctypes.c_ulong(2))
+
+    with pytest.raises(ZlibError, match='buffer error'):
+        compress2(dest_small, dest_len_small, data, len(data), 9)
+
+
+def test_raises_describe_dict():
+
+    lib = Library('z')
+
+    @lib.f(errcheck=raises(ZlibError, describe={-5: 'custom buffer error'}))
+    def compress2(dest: CRef, dest_len: CRef, source: bytes, source_len: CLongU, level: int) -> int:
+        ...
+
+    lib.bind_types()
+
+    dest = CRef.carray(str, size=2)
+    dest_len = CRef(ctypes.c_ulong(2))
+
+    with pytest.raises(ZlibError, match='custom buffer error'):
+        compress2(dest, dest_len, b'data', 4, 9)
 
 
 def test_gzread(tmp_path):

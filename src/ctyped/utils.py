@@ -1,6 +1,6 @@
 import ctypes
 import inspect
-from typing import NamedTuple
+from typing import Any, NamedTuple, Union
 from ctypes import get_errno, CFUNCTYPE
 from errno import errorcode
 from os import strerror
@@ -138,6 +138,43 @@ def get_last_error() -> ErrorInfo:
     msg = strerror(num)
 
     return ErrorInfo(num=num, code=code, msg=msg)
+
+
+def raises(exc: type[Exception], *, ok: Any = 0, describe: Union[Callable[[Any], str], dict, None] = None) -> Callable:
+    """Returns an errcheck callable raising the given exception
+    when a function result is not equal to the expected value.
+
+    .. code-block:: python
+
+        @lib.f(errcheck=raises(ZlibError, describe=zError))
+        def deflateInit2_(strm: CPointer, level: int) -> int:
+            ...
+
+    :param exc: Exception class to raise.
+
+    :param ok: Expected (successful) result value.
+
+    :param describe: Maps a result value to an error message.
+        Either a callable or a ``{value: message}`` dict.
+        If not set, the result value itself is used as a message.
+
+    """
+    def raises_(result, func, args):
+
+        if result == ok:
+            return result
+
+        msg = result
+
+        if callable(describe):
+            msg = describe(result)
+
+        elif describe is not None:
+            msg = describe.get(result, result)
+
+        raise exc(msg)
+
+    return raises_
 
 
 def c_callback(use_errno: bool = False) -> Callable:
