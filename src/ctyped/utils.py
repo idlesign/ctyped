@@ -107,15 +107,17 @@ def cast_type(func_info, argname: str, thint: Any):
 
         }
 
-        if int_bits:
-            assert int_bits in thint_map.keys(), 'Wrong value passed for int_bits.'
-
-        else:
+        if int_bits is None:
             int_bits = 64  # todo maybe try to guess
+
+        if int_bits not in thint_map:
+            raise TypehintError(
+                f'Wrong value passed for int_bits: {int_bits}. '
+                f'Function: {func_info.name_py}. Arg: {argname}.')
 
         type_idx = 1 if (int_sign is not None and not int_sign) else 0
 
-        thint = thint_map[int_bits][type_idx] or thint
+        thint = thint_map[int_bits][type_idx]
 
     return thint
 

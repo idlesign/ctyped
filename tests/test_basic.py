@@ -174,6 +174,18 @@ def test_strings():
     assert Wide.func_str_utf('пример') == 'вот: пример'
 
 
+def test_invalid_int_bits():
+
+    lib = Library(MYLIB_PATH)
+
+    @lib.f(int_bits=7)
+    def f_noprefix_1(val: int) -> int:
+        ...
+
+    with pytest.raises(TypehintError, match='int_bits'):
+        lib.bind_types()
+
+
 def test_bare_decorator_no_prefix():
 
     lib = Library(MYLIB_PATH, int_bits=32)
