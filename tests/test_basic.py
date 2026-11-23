@@ -174,6 +174,18 @@ def test_strings():
     assert Wide.func_str_utf('пример') == 'вот: пример'
 
 
+def test_bare_decorator_no_prefix():
+
+    lib = Library(MYLIB_PATH, int_bits=32)
+
+    @lib.f
+    def f_noprefix_1() -> int:
+        ...
+
+    lib.bind_types()
+    assert f_noprefix_1() == -10
+
+
 def test_no_redeclare():
 
     with pytest.raises(FunctionRedeclared):

@@ -86,6 +86,9 @@ class Scopes:
 
             result[key] = reduce(reducer, (scope[key] for scope in scopes[::-1]))
 
+        # A single scope bypasses concat, leaving prefix None.
+        result['prefix'] = result['prefix'] or ''
+
         return result
 
     @contextmanager
