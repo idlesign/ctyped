@@ -6,6 +6,7 @@
 * !! Changed default 'int' hint mapping from 64 to 32 bits (C 'int'). Use CLong/CLongLong hints or int_bits=64 for wider integers.
 * !! Changed string results (CChars/CCharsW): a NULL pointer from C now produces None instead of an empty string.
 * ++ Added CFloat and CDouble type hints.
+* ++ Added CSizeT and CSSizeT type hints (C 'size_t' and 'ssize_t').
 * ** Cleaned up ctyped.utils imports (no more star import).
 * ** CRef is now explicitly unhashable since the referenced value may change from C side.
 * ** Fixed get_last_error() raising KeyError on unknown errno values; ErrorInfo.code is None in that case.

@@ -39,6 +39,9 @@ CInt32U: int = ctypes.c_uint32
 CInt64: int = ctypes.c_int64
 CInt64U: int = ctypes.c_uint64
 
+CSizeT: int = ctypes.c_size_t
+CSSizeT: int = ctypes.c_ssize_t
+
 CFloat: float = ctypes.c_float
 CDouble: float = ctypes.c_double
 
