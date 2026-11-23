@@ -88,6 +88,9 @@ class CStruct(CastedTypeBase, ctypes.Structure):
 class CRef(CastedTypeBase):
     """Reference helper."""
 
+    # The referenced value may change from C side at any moment, so hashing is unsafe.
+    __hash__ = None
+
     @classmethod
     def carray(cls, typecls: Any, *, size: int = 1) -> 'CRef':
         """Alternative constructor. Creates a reference to array."""
