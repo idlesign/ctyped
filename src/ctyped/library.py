@@ -300,6 +300,10 @@ class Library:
     ) -> Callable:
         """Decorator to mark functions which exported from the library.
 
+        .. note:: Functions without a return type annotation are treated
+            as having a ``void`` result. Use ``-> None`` to state that
+            explicitly.
+
         :param name_c: C function name with or without prefix (see ``.scope(prefix=)``).
             If not set, Python function name is used.
 
@@ -432,13 +436,14 @@ class Library:
             errcheck = None
 
             try:
-                return_is_annotated = 'return' in annotations
-                restype = cast_type(func_info, 'return', annotations.pop('return', None))
+                restype = cast_type(func_info, 'return', annotations.get('return'))
 
                 if restype and issubclass(restype, CastedTypeBase):
                     errcheck = restype._ct_res
 
-                argtypes = [cast_type(func_info, argname, argtype) for argname, argtype in annotations.items()]
+                argtypes = [
+                    cast_type(func_info, argname, argtype)
+                    for argname, argtype in annotations.items() if argname != 'return']
 
             except TypehintError:
                 # Reset annotations to allow subsequent .bind_types() calls w/o exceptions.
@@ -449,8 +454,8 @@ class Library:
                 if argtypes:
                     func_c.argtypes = argtypes
 
-                if restype or return_is_annotated:
-                    func_c.restype = restype
+                # No return annotation means void result.
+                func_c.restype = restype
 
                 if errcheck:
                     func_c.errcheck = errcheck

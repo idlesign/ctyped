@@ -8,7 +8,9 @@
 * ** CRef is now explicitly unhashable since the referenced value may change from C side.
 * ** Fixed get_last_error() raising KeyError on unknown errno values; ErrorInfo.code is None in that case.
 * ** Fixed int_sign=0 being treated as signed; falsy int_sign values now consistently mean unsigned.
+* ** Fixed repeated .bind_types() calls discarding previously bound function result types.
 * ** Fixed TypeError on bare decorator (@lib.f/@lib.m without parentheses) usage when no prefix was set.
+* ** Functions without a return type annotation are now documented as having a void result.
 * ** Invalid int_bits value now raises TypehintError instead of AssertionError.
 
 ### v0.8.1 [2026-11-14]
