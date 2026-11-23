@@ -1,11 +1,13 @@
 import ctypes
 import inspect
+from difflib import get_close_matches
 from typing import Any, NamedTuple, Union
 from ctypes import get_errno, CFUNCTYPE
 from errno import errorcode
 from os import strerror
 from typing import Callable, Optional
 
+from . import types as ctyped_types
 from .exceptions import TypehintError, FunctionRedeclared
 from .types import CChars, CInt8, CInt8U, CInt16, CInt16U, CInt32, CInt32U, CInt64, CInt64U
 
@@ -82,9 +84,13 @@ def cast_type(func_info, argname: str, thint: Any):
         thint = thint_str_to_obj(thint)
 
         if thint is None:
+            candidates = dir(ctyped_types) + ['int', 'str', 'float', 'bool', 'bytes']
+            close = get_close_matches(thint_orig, candidates, n=3, cutoff=0.6)
+            suggestion = f" Did you mean: {', '.join(close)}?" if close else ''
+
             raise TypehintError(
                 f'Unable to resolve type hint. '
-                f'Function: {func_info.name_py}. Arg: {argname}. Type: {thint_orig}.')
+                f'Function: {func_info.name_py}. Arg: {argname}. Type: {thint_orig}.{suggestion}')
 
     if thint is bool:
         thint = ctypes.c_bool

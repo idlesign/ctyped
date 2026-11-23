@@ -274,6 +274,18 @@ def test_unresolved_typehint():
     assert 'SomeDummyType' in str(e.value)
 
 
+def test_unresolved_typehint_suggestion():
+
+    lib = Library(MYLIB_PATH)
+
+    @lib.f()
+    def f_noprefix_1(val: 'CIn') -> int:
+        ...
+
+    with pytest.raises(TypehintError, match='Did you mean: CInt'):
+        lib.bind_types()
+
+
 def test_unsupported_type():
 
     class SomeType:

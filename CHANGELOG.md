@@ -13,6 +13,7 @@
 * ++ Added human-readable __repr__ for Library and CRef.
 * ++ Added Library.describe() returning a structured description of the declared interface (functions, structures, bound types).
 * ++ Added raises() errcheck helper and 'errcheck' parameter for .function()/.method() decorators.
+* ++ Unresolved type hint errors now suggest close matches.
 * ** Cleaned up ctyped.utils imports (no more star import).
 * ** CRef is now explicitly unhashable since the referenced value may change from C side.
 * ** Fixed get_last_error() raising KeyError on unknown errno values; ErrorInfo.code is None in that case.
