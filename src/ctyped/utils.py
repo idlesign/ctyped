@@ -97,7 +97,7 @@ def cast_type(func_info, argname: str, thint: Any):
 
     elif thint is int:
         int_bits = func_info.options.get('int_bits')
-        int_sign = func_info.options.get('int_sign', False)
+        int_sign = func_info.options.get('int_sign')
 
         thint_map = {
             8: (CInt8, CInt8U),
@@ -113,7 +113,7 @@ def cast_type(func_info, argname: str, thint: Any):
         else:
             int_bits = 64  # todo maybe try to guess
 
-        type_idx = 1 if int_sign is False else 0
+        type_idx = 1 if (int_sign is not None and not int_sign) else 0
 
         thint = thint_map[int_bits][type_idx] or thint
 
