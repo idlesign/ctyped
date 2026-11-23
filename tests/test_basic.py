@@ -83,6 +83,10 @@ with mylib.scope('f_prefix_one_'):
     def func_str(some: str) -> str:
         ...
 
+    @mylib.f('bytes_p')
+    def func_bytes(some: bytes) -> bytes:
+        ...
+
     @mylib.cls(prefix='wchar_', str_type=CCharsW)
     class Wide:
 
@@ -178,6 +182,10 @@ def test_strings():
 
     assert func_str('mind') == 'hereyouare: mind'
     assert Wide.func_str_utf('пример') == 'вот: пример'
+
+
+def test_bytes():
+    assert func_bytes(b'\xff\xfe mind') == b'hereyouare: \xff\xfe mind'
 
 
 def test_null_string_result():

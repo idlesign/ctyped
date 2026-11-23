@@ -95,6 +95,9 @@ def cast_type(func_info, argname: str, thint: Any):
     elif thint is str:
         thint = func_info.options.get('str_type', CChars)
 
+    elif thint is bytes:
+        thint = ctypes.c_char_p
+
     elif thint is int:
         int_bits = func_info.options.get('int_bits')
         int_sign = func_info.options.get('int_sign')

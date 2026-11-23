@@ -5,6 +5,7 @@
 * !! Changed CRef.carray() 'float' shortcut to map to C 'double', consistent with the 'float' hint. Pass CFloat explicitly for C 'float' arrays.
 * !! Changed default 'int' hint mapping from 64 to 32 bits (C 'int'). Use CLong/CLongLong hints or int_bits=64 for wider integers.
 * !! Changed string results (CChars/CCharsW): a NULL pointer from C now produces None instead of an empty string.
+* ++ Added 'bytes' type hint support: raw binary data as C chars pointer (no UTF-8 encoding).
 * ++ Added CFloat and CDouble type hints.
 * ++ Added CSizeT and CSSizeT type hints (C 'size_t' and 'ssize_t').
 * ** Cleaned up ctyped.utils imports (no more star import).
