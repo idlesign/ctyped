@@ -1,6 +1,7 @@
 # ctyped changelog
 
 ### Unreleased
+* ** Cleaned up ctyped.utils imports (no more star import).
 * ** Fixed TypeError on bare decorator (@lib.f/@lib.m without parentheses) usage when no prefix was set.
 
 ### v0.8.1 [2026-11-14]

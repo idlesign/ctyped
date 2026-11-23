@@ -1,3 +1,4 @@
+import ctypes
 import inspect
 from typing import NamedTuple
 from ctypes import get_errno, CFUNCTYPE
@@ -6,7 +7,7 @@ from os import strerror
 from typing import Callable, Optional
 
 from .exceptions import TypehintError, FunctionRedeclared
-from .types import *
+from .types import CChars, CInt8, CInt8U, CInt16, CInt16U, CInt32, CInt32U, CInt64, CInt64U
 
 class FuncInfo(NamedTuple):
     name_py: str
