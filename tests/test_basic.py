@@ -6,7 +6,7 @@ import pytest
 
 from ctyped.exceptions import FunctionRedeclared, TypehintError, UnsupportedTypeError
 from ctyped.toolbox import Library, get_last_error, c_callback
-from ctyped.types import CInt, CCharsW, CRef, CPointer
+from ctyped.types import CInt, CCharsW, CFloat, CRef, CPointer
 
 ############################################################
 # Library interface
@@ -68,7 +68,11 @@ with mylib.scope('f_prefix_one_'):
         ...
 
     @mylib.f
-    def float_to_float(val: float) -> float:
+    def float_to_float(val: CFloat) -> CFloat:
+        ...
+
+    @mylib.f
+    def double_to_double(val: float) -> float:
         ...
 
     @mylib.function(int_bits=8, int_sign=False)
@@ -134,6 +138,7 @@ def test_basic():
 
     float_ = 1.3
     assert float_to_float(float_) == pytest.approx(float_)
+    assert double_to_double(float_) == float_
 
     prober = get_prober()
     assert isinstance(prober, Prober)

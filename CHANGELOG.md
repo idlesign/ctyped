@@ -1,6 +1,8 @@
 # ctyped changelog
 
 ### Unreleased
+* !! Changed 'float' type hint to map to C 'double' instead of C 'float'. Use the new CFloat hint for C 'float'.
+* ++ Added CFloat and CDouble type hints.
 * ** Cleaned up ctyped.utils imports (no more star import).
 * ** CRef is now explicitly unhashable since the referenced value may change from C side.
 * ** Fixed get_last_error() raising KeyError on unknown errno values; ErrorInfo.code is None in that case.

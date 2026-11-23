@@ -39,6 +39,9 @@ CInt32U: int = ctypes.c_uint32
 CInt64: int = ctypes.c_int64
 CInt64U: int = ctypes.c_uint64
 
+CFloat: float = ctypes.c_float
+CDouble: float = ctypes.c_double
+
 CPointer: Any = ctypes.c_void_p
 CObject = CPointer  # Mere alias for those who prefer ``class My(CObject): ...`` better.
 

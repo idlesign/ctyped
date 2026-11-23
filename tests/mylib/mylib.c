@@ -75,6 +75,11 @@ float f_prefix_one_float_to_float(float val) {
 }
 
 
+double f_prefix_one_double_to_double(double val) {
+    return val;
+}
+
+
 typedef int (*callback) (int num);
 
 

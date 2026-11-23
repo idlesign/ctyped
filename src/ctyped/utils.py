@@ -90,7 +90,7 @@ def cast_type(func_info, argname: str, thint: Any):
         thint = ctypes.c_bool
 
     elif thint is float:
-        thint = ctypes.c_float
+        thint = ctypes.c_double
 
     elif thint is str:
         thint = func_info.options.get('str_type', CChars)
