@@ -30,6 +30,10 @@ CLongLongU: int = ctypes.c_ulonglong
 
 CInt: int = ctypes.c_int
 CIntU: int = ctypes.c_uint
+
+CChar: bytes = ctypes.c_char
+CCharU: bytes = ctypes.c_ubyte
+
 CInt8: int = ctypes.c_int8
 CInt8U: int = ctypes.c_uint8
 CInt16: int = ctypes.c_int16
