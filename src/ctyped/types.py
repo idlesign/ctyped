@@ -174,7 +174,12 @@ class CRef(CastedTypeBase):
 
 
 class CChars(CastedTypeBase, ctypes.c_char_p):
-    """Represents a Python string as a C chars pointer."""
+    """Represents a Python string as a C chars pointer.
+
+    .. note:: Values are decoded as UTF-8 in strict mode, so invalid
+        bytes coming from C side will raise ``UnicodeDecodeError``.
+
+    """
 
     @classmethod
     def _ct_prep(cls, val):
@@ -184,8 +189,8 @@ class CChars(CastedTypeBase, ctypes.c_char_p):
     def _ct_res(cls, cobj: 'CChars', *args, **kwargs) -> str | None:
         value = cobj.value
 
-        if not value:
-            return ''
+        if value is None:
+            return None
 
         return value.decode('utf-8')
 
@@ -199,7 +204,7 @@ class CCharsW(CastedTypeBase, ctypes.c_wchar_p):
 
     @classmethod
     def _ct_res(cls, cobj: 'CCharsW', *args, **kwargs) -> str | None:
-        return cobj.value or ''
+        return cobj.value
 
     @classmethod
     def from_param(cls, val: str):

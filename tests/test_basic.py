@@ -180,6 +180,20 @@ def test_strings():
     assert Wide.func_str_utf('пример') == 'вот: пример'
 
 
+def test_null_string_result():
+
+    lib = Library(MYLIB_PATH)
+
+    with lib.scope('f_prefix_one_'):
+
+        @lib.f('null_str')
+        def null_str() -> str:
+            ...
+
+    lib.bind_types()
+    assert null_str() is None
+
+
 def test_get_last_error_unknown_errno():
 
     ctypes.set_errno(0)

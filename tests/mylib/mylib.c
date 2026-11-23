@@ -101,6 +101,11 @@ const char * f_prefix_one_char_p(char* val) {
 }
 
 
+const char * f_prefix_one_null_str() {
+    return NULL;
+}
+
+
 const wchar_t * f_prefix_one_wchar_p(wchar_t* val) {
     setlocale(LC_ALL, "en_US.utf8");
 
