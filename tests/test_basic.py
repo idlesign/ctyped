@@ -6,7 +6,7 @@ import pytest
 
 from ctyped.exceptions import FunctionRedeclared, TypehintError, UnsupportedTypeError
 from ctyped.toolbox import Library, get_last_error, c_callback
-from ctyped.types import CInt, CCharsW, CFloat, CRef, CPointer
+from ctyped.types import CInt, CChar, CCharsW, CFloat, CRef, CPointer
 
 ############################################################
 # Library interface
@@ -29,6 +29,13 @@ class MyStruct:
 
     def get_additional(self):
         return 10
+
+
+@mylib.structure()
+class WithArrays:
+
+    coords: CInt * 4
+    name: CChar * 8
 
 
 @mylib.f()
@@ -306,3 +313,14 @@ def test_struct():
     result.second = ''
     assert not result.second
     assert result.third.first == 15
+
+
+def test_struct_arrays():
+
+    struct = WithArrays()
+
+    struct.coords[1] = 7
+    struct.name = b'ab'
+
+    assert list(struct.coords) == [0, 7, 0, 0]
+    assert struct.name == b'ab'
