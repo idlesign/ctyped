@@ -315,6 +315,11 @@ def test_struct():
     assert result.third.first == 15
 
 
+def test_repr():
+    assert repr(mylib) == f"<Library '{MYLIB_PATH}' funcs={len(mylib.funcs)}>"
+    assert repr(CRef.cint(33)) == '<CRef(c_int(33))>'
+
+
 def test_describe():
 
     desc = mylib.describe()

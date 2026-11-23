@@ -10,6 +10,7 @@
 * ++ Added CFloat and CDouble type hints.
 * ++ Added check_errno() errcheck helper turning C errno failures into exceptions (OSError by default).
 * ++ Added CSizeT and CSSizeT type hints (C 'size_t' and 'ssize_t').
+* ++ Added human-readable __repr__ for Library and CRef.
 * ++ Added Library.describe() returning a structured description of the declared interface (functions, structures, bound types).
 * ++ Added raises() errcheck helper and 'errcheck' parameter for .function()/.method() decorators.
 * ** Cleaned up ctyped.utils imports (no more star import).

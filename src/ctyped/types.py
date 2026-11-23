@@ -140,6 +140,9 @@ class CRef(CastedTypeBase):
     def __init__(self, cval: Any):
         self._ct_val = cval
 
+    def __repr__(self):
+        return f'<CRef({self._ct_val!r})>'
+
     def __iter__(self):
         # Allows iteration for arrays.
         return iter(self._ct_val)

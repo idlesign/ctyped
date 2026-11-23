@@ -162,6 +162,9 @@ class Library:
 
         autoload and self.load()
 
+    def __repr__(self):
+        return f"<Library '{self.name}' funcs={len(self.funcs)}>"
+
     def load(self):
         """Loads shared library."""
         name = self.name
