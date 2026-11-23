@@ -315,6 +315,21 @@ def test_struct():
     assert result.third.first == 15
 
 
+def test_describe():
+
+    desc = mylib.describe()
+
+    func = desc['functions']['f_prefix_one_uint8_add']
+    assert func['name_py'] == 'uint8_add'
+    assert func['args'] == {'val': 'c_ubyte'}
+    assert func['result'] == 'c_ubyte'
+    assert func['errcheck'] is None
+
+    struct = desc['structures']['MyStruct']
+    assert struct['fields'] == {'first': 'c_byte', 'second': 'CChars', 'third': 'LP_MyStruct'}
+    assert struct['size'] > 0
+
+
 def test_struct_arrays():
 
     struct = WithArrays()

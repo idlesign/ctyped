@@ -158,6 +158,7 @@ class Library:
         self.name = str(name)
         self.lib = None
         self.funcs: dict[str, Union[Callable, partialmethod[Any]]] = {}
+        self.structs: dict[str, type] = {}
 
         autoload and self.load()
 
@@ -249,6 +250,8 @@ class Library:
 
                 struct._ct_fields = ct_fields
                 struct._fields_ = fields
+
+            self.structs[cls_name] = struct
 
             return struct
 
@@ -427,6 +430,41 @@ class Library:
         sniffer = NmSymbolSniffer(self.lib._name)
         result = sniffer.sniff()
         return result
+
+    def describe(self) -> dict:
+        """Returns a structured description of the library interface
+        as declared by ``.structure()``/``.function()`` decorators.
+
+        .. note:: Call after ``.bind_types()`` to get actual bound types.
+
+        """
+        description = {'name': self.name, 'functions': {}, 'structures': {}}
+
+        for name_c, func_out in self.funcs.items():
+
+            func_c = getattr(func_out, 'cfunc', func_out)
+            func_info: FuncInfo = func_c.ctyped
+            errcheck = getattr(func_c, 'errcheck', None)
+
+            description['functions'][name_c] = {
+                'name_py': func_info.name_py,
+                'args': {
+                    argname: argtype.__name__
+                    for argname, argtype in zip(func_info.annotations, getattr(func_c, 'argtypes', None) or [])
+                    if argname != 'return'
+                },
+                'result': getattr(func_c.restype, '__name__', None),
+                'errcheck': getattr(errcheck, '__qualname__', None),
+            }
+
+        for struct_name, struct in self.structs.items():
+
+            description['structures'][struct_name] = {
+                'fields': {fname: ftype.__name__ for fname, ftype in struct._fields_},
+                'size': ctypes.sizeof(struct),
+            }
+
+        return description
 
     def bind_types(self):
         """Deduces ctypes argument and result types from Python type hints,
