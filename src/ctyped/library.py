@@ -40,7 +40,7 @@ class Scopes:
 
         :param int_bits: int length to be used in function.
 
-            Possible values: 8, 16, 32, 64
+            Possible values: 8, 16, 32 (C ``int``, default), 64
 
         :param int_sign: Flag. Whether to use signed (True) or unsigned (False) ints.
 
@@ -143,7 +143,7 @@ class Library:
 
         :param int_bits: int length to use by default.
 
-            Possible values: 8, 16, 32, 64
+            Possible values: 8, 16, 32 (C ``int``, default), 64
 
             .. note:: This setting is global to library. Can be changed on function definition level.
 

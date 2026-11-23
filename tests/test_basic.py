@@ -214,6 +214,18 @@ def test_invalid_int_bits():
         lib.bind_types()
 
 
+def test_default_int_is_32bit_signed():
+
+    lib = Library(MYLIB_PATH)
+
+    @lib.f()
+    def f_noprefix_1() -> int:
+        ...
+
+    lib.bind_types()
+    assert f_noprefix_1() == -10
+
+
 def test_bare_decorator_no_prefix():
 
     lib = Library(MYLIB_PATH, int_bits=32)

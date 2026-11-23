@@ -10,7 +10,7 @@ from ctyped.types import CIntU, CLongU, CPointer, CRef
 if find_library('z') is None:
     pytest.skip('libz is not available', allow_module_level=True)
 
-zlib_lib = Library('z', int_bits=32)
+zlib_lib = Library('z')
 
 
 @zlib_lib.f

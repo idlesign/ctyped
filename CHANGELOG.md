@@ -2,6 +2,7 @@
 
 ### Unreleased
 * !! Changed 'float' type hint to map to C 'double' instead of C 'float'. Use the new CFloat hint for C 'float'.
+* !! Changed default 'int' hint mapping from 64 to 32 bits (C 'int'). Use CLong/CLongLong hints or int_bits=64 for wider integers.
 * !! Changed string results (CChars/CCharsW): a NULL pointer from C now produces None instead of an empty string.
 * ++ Added CFloat and CDouble type hints.
 * ** Cleaned up ctyped.utils imports (no more star import).

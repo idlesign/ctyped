@@ -108,7 +108,7 @@ def cast_type(func_info, argname: str, thint: Any):
         }
 
         if int_bits is None:
-            int_bits = 64  # todo maybe try to guess
+            int_bits = 32
 
         if int_bits not in thint_map:
             raise TypehintError(
