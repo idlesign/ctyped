@@ -1,3 +1,4 @@
+import ctypes
 import faulthandler
 from pathlib import Path
 
@@ -172,6 +173,14 @@ def test_strings():
 
     assert func_str('mind') == 'hereyouare: mind'
     assert Wide.func_str_utf('пример') == 'вот: пример'
+
+
+def test_get_last_error_unknown_errno():
+
+    ctypes.set_errno(0)
+    err = get_last_error()
+    assert err.num == 0
+    assert err.code is None
 
 
 def test_invalid_int_bits():

@@ -18,7 +18,7 @@ class FuncInfo(NamedTuple):
 
 class ErrorInfo(NamedTuple):
     num: int
-    code: int
+    code: Optional[str]
     msg: str
 
 
@@ -131,7 +131,7 @@ def get_last_error() -> ErrorInfo:
 
     """
     num = get_errno()
-    code = errorcode[num]
+    code = errorcode.get(num)
     msg = strerror(num)
 
     return ErrorInfo(num=num, code=code, msg=msg)

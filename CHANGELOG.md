@@ -2,6 +2,7 @@
 
 ### Unreleased
 * ** Cleaned up ctyped.utils imports (no more star import).
+* ** Fixed get_last_error() raising KeyError on unknown errno values; ErrorInfo.code is None in that case.
 * ** Fixed int_sign=0 being treated as signed; falsy int_sign values now consistently mean unsigned.
 * ** Fixed TypeError on bare decorator (@lib.f/@lib.m without parentheses) usage when no prefix was set.
 * ** Invalid int_bits value now raises TypehintError instead of AssertionError.
