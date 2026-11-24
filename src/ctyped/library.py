@@ -9,7 +9,7 @@ from typing import Any
 from collections.abc import Callable
 
 from .exceptions import UnsupportedTypeError, TypehintError, CtypedException
-from .sniffer import NmSymbolSniffer, SniffResult
+from .sniffer import NmSymbolSniffer, SniffResult, resolve_lib_path
 from .types import CChars, CastedTypeBase, CStruct
 from .utils import cast_type, extract_func_info, FuncInfo
 
@@ -440,7 +440,7 @@ class Library:
             and variadic functions are not annotated.
 
         """
-        sniffer = NmSymbolSniffer(self.lib._name)
+        sniffer = NmSymbolSniffer(resolve_lib_path(self.lib._name))
         result = sniffer.sniff()
         return result
 

@@ -38,6 +38,33 @@ def _get_dwarf_info(elf):
         return elf.get_dwarf_info()
 
 
+def resolve_lib_path(name: str) -> str:
+    """Resolves a library name or soname into a full filesystem path.
+
+    Uses ldconfig cache when the given name is not a path itself.
+
+    """
+    if Path(name).exists():
+        return name
+
+    try:
+        result = subprocess.run(['ldconfig', '-p'], capture_output=True)
+
+    except FileNotFoundError:  # pragma: nocover
+        result = None
+
+    if result is not None and not result.returncode:
+
+        for line in result.stdout.decode().splitlines():
+
+            soname, sep, candidate = line.strip().partition(' => ')
+
+            if sep and soname.split(' ')[0] == name and Path(candidate).exists():
+                return candidate
+
+    raise SniffingError(f'Unable to resolve library path: {name}')
+
+
 class SniffedSymbol(NamedTuple):
     name: str
     address: str

@@ -117,6 +117,13 @@ def test_raises_describe_dict():
         compress2(dest, dest_len, b'data', 4, 9)
 
 
+def test_sniff_by_name():
+
+    dumped = zlib_lib.sniff().to_ctyped()
+    compile(dumped, '<sniffed>', 'exec')
+    assert 'def adler32' in dumped
+
+
 def test_gzread(tmp_path):
 
     payload = b'gzipped payload'

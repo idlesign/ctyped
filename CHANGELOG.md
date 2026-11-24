@@ -21,6 +21,7 @@
 * ** Fixed code generation for versioned symbols (name@@VERSION produced invalid Python); stubs without line info now use 'pass' instead of an empty docstring.
 * ** Fixed get_last_error() raising KeyError on unknown errno values; ErrorInfo.code is None in that case.
 * ** Fixed int_sign=0 being treated as signed; falsy int_sign values now consistently mean unsigned.
+* ** Fixed Library.sniff() failing for libraries loaded by name: library path is now resolved via ldconfig cache.
 * ** Fixed TypeError on bare decorator (@lib.f/@lib.m without parentheses) usage when no prefix was set.
 * ** Functions without a return type annotation are now documented as having a void result.
 * ** Invalid int_bits value now raises TypehintError instead of AssertionError.
