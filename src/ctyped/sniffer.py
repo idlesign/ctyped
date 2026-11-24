@@ -416,7 +416,7 @@ class NmSymbolSniffer:
 
         try:
             result = subprocess.run(
-                ['nm', '-DCl', self.libpath],
+                ['nm', '-Dl', self.libpath],
                 capture_output=True,
             )
 
@@ -453,7 +453,8 @@ class NmSymbolSniffer:
 
             address, symtype, name = chunks
 
-            if symtype != 'T' or name in self._SYMBOLS_SKIP:
+            # C++ symbols are mangled and can not be used via ctypes anyway.
+            if symtype != 'T' or name in self._SYMBOLS_SKIP or name.startswith('_Z'):
                 continue
 
             name, _, srcline = name.partition('\t')

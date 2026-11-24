@@ -147,6 +147,7 @@ def test_sniff_versioned_symbols():
         '0000000000009abc T cos',
         '0000000000000abc T _init',
         '0000000000000abd T __asan_report_load8',
+        '0000000000000abe T _ZNSt6vectorIcSaIcEE5clearEv@@GLIBCXX_3.4.21',
     ]
     symbols = NmSymbolSniffer('unused')._get_symbols(lines)
     assert [symbol.name for symbol in symbols] == ['sin', 'cos', '__asan_report_load8']
