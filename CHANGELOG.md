@@ -1,6 +1,6 @@
 # ctyped changelog
 
-### Unreleased
+### v1.0.0 [2026-11-24]
 * !! Changed 'float' type hint to map to C 'double' instead of C 'float'. Use the new CFloat hint for C 'float'.
 * !! Changed CRef.carray() 'float' shortcut to map to C 'double', consistent with the 'float' hint. Pass CFloat explicitly for C 'float' arrays.
 * !! Changed default 'int' hint mapping from 64 to 32 bits (C 'int'). Use CLong/CLongLong hints or int_bits=64 for wider integers.
