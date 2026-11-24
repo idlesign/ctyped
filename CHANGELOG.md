@@ -5,6 +5,7 @@
 * !! Changed CRef.carray() 'float' shortcut to map to C 'double', consistent with the 'float' hint. Pass CFloat explicitly for C 'float' arrays.
 * !! Changed default 'int' hint mapping from 64 to 32 bits (C 'int'). Use CLong/CLongLong hints or int_bits=64 for wider integers.
 * !! Changed string results (CChars/CCharsW): a NULL pointer from C now produces None instead of an empty string.
+* !! Dropped Python 3.10 support (end of life); Python 3.11+ is required now. Type hints modernized accordingly.
 * ++ Added 'bytes' type hint support: raw binary data as C chars pointer (no UTF-8 encoding).
 * ++ Added CChar and CCharU type hints (C 'char' and 'unsigned char').
 * ++ Added CFloat and CDouble type hints.

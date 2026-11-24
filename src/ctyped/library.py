@@ -1,11 +1,12 @@
 import ctypes
 import inspect
 import logging
-from contextlib import contextmanager
+from contextlib import AbstractContextManager, contextmanager
 from ctypes.util import find_library
 from functools import partial, partialmethod, reduce
 from pathlib import Path
-from typing import Any, Callable, Union, List, Dict, Type, ContextManager
+from typing import Any
+from collections.abc import Callable
 
 from .exceptions import UnsupportedTypeError, TypehintError, CtypedException
 from .sniffer import NmSymbolSniffer, SniffResult
@@ -28,7 +29,7 @@ class Scopes:
             str_type: type[CastedTypeBase] = CChars,
             int_bits: int | None = None,
             int_sign: bool | None = None,
-            **kwargs) -> ContextManager['Scopes']:
+            **kwargs) -> AbstractContextManager['Scopes']:
         """
 
         :param prefix: Function name prefix to apply to functions under the manager.
@@ -118,7 +119,7 @@ class Library:
     """
 
     def __init__(
-            self, name: Union[str, Path], *, autoload: bool = True,
+            self, name: str | Path, *, autoload: bool = True,
             prefix: str | None = None,
             str_type: type[CastedTypeBase] = CChars,
             int_bits: int | None = None,
@@ -157,7 +158,7 @@ class Library:
 
         self.name = str(name)
         self.lib = None
-        self.funcs: dict[str, Union[Callable, partialmethod[Any]]] = {}
+        self.funcs: dict[str, Callable | partialmethod[Any]] = {}
         self.structs: dict[str, type] = {}
 
         autoload and self.load()
@@ -298,7 +299,7 @@ class Library:
         return wrapper
 
     def function(
-            self, name_c: Union[str, Callable] | None = None, *, wrap: bool = False,
+            self, name_c: str | Callable | None = None, *, wrap: bool = False,
             str_type: CastedTypeBase | None = None,
             int_bits: int | None = None,
             int_sign: bool | None = None,

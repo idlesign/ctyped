@@ -10,7 +10,7 @@
 
 *Build ctypes interfaces for shared libraries with type hinting*
 
-**Requires Python 3.10+**
+**Requires Python 3.11+**
 
 * Less boilerplate;
 * Logical structuring;

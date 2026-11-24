@@ -1,11 +1,11 @@
 import ctypes
 import inspect
 from difflib import get_close_matches
-from typing import Any, NamedTuple, Union
+from typing import Any, NamedTuple
 from ctypes import get_errno, CFUNCTYPE
 from errno import errorcode
 from os import strerror
-from typing import Callable, Optional
+from collections.abc import Callable
 
 from . import types as ctyped_types
 from .exceptions import TypehintError, FunctionRedeclared
@@ -146,7 +146,7 @@ def get_last_error() -> ErrorInfo:
     return ErrorInfo(num=num, code=code, msg=msg)
 
 
-def raises(exc: type[Exception], *, ok: Any = 0, describe: Union[Callable[[Any], str], dict, None] = None) -> Callable:
+def raises(exc: type[Exception], *, ok: Any = 0, describe: Callable[[Any], str] | dict | None = None) -> Callable:
     """Returns an errcheck callable raising the given exception
     when a function result is not equal to the expected value.
 

@@ -5,7 +5,7 @@ from typing import Any, Union
 class CastedTypeBase:
 
     @classmethod
-    def _ct_prep(cls, val: Any) -> Union[bytes, int]:
+    def _ct_prep(cls, val: Any) -> bytes | int:
         # Prepare value. Used for structure fields.
         return val
 

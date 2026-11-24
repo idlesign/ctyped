@@ -1,4 +1,4 @@
-target-version = "py310"
+target-version = "py311"
 line-length = 120
 extend-exclude = [
     "migrations",
@@ -49,8 +49,6 @@ ignore = [
     "FBT002",
     "FBT003",
     "I001",
-    "UP007",
-    "UP035",
 ]
 
 [lint.extend-per-file-ignores]
