@@ -18,6 +18,7 @@
 * ++ Unresolved type hint errors now suggest close matches.
 * ** Cleaned up ctyped.utils imports (no more star import).
 * ** CRef is now explicitly unhashable since the referenced value may change from C side.
+* ** Fixed code generation for versioned symbols (name@@VERSION produced invalid Python); stubs without line info now use 'pass' instead of an empty docstring.
 * ** Fixed get_last_error() raising KeyError on unknown errno values; ErrorInfo.code is None in that case.
 * ** Fixed int_sign=0 being treated as signed; falsy int_sign values now consistently mean unsigned.
 * ** Fixed repeated .bind_types() calls discarding previously bound function result types.

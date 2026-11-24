@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 from ctyped.exceptions import FunctionRedeclared, TypehintError, UnsupportedTypeError
+from ctyped.sniffer import NmSymbolSniffer, SniffResult, SniffedSymbol
 from ctyped.toolbox import Library, get_last_error, c_callback
 from ctyped.types import CInt, CChar, CCharsW, CFloat, CRef, CPointer
 
@@ -136,6 +137,33 @@ def test_sniff():
     assert "mylib.so')" in dumped
     assert 'def buggy1() -> int:' in dumped
     assert 'bind_types()' in dumped
+
+
+def test_sniff_versioned_symbols():
+
+    lines = [
+        '0000000000001234 T sin@@GLIBC_2.2.5',
+        '0000000000005678 T sin@GLIBC_2.2.5',
+        '0000000000009abc T cos',
+    ]
+    symbols = NmSymbolSniffer('unused')._get_symbols(lines)
+    assert [symbol.name for symbol in symbols] == ['sin', 'cos']
+
+
+def test_sniff_result_no_line_info():
+
+    result = SniffResult(libpath='x.so')
+    result.add_symbol(SniffedSymbol(name='some_func', address='', line=''))
+    assert 'pass' in result.to_ctyped()
+
+
+def test_sniff_result_keyword_arg_name():
+
+    result = SniffResult(libpath='x.so')
+    result.add_symbol(SniffedSymbol(name='some_func', address='', line='', args=[('def', 'int')], result='int'))
+    dumped = result.to_ctyped()
+    compile(dumped, '<sniffed>', 'exec')
+    assert 'def_: int' in dumped
 
 
 def test_sniff_typed():

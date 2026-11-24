@@ -1,3 +1,4 @@
+import keyword
 import logging
 import subprocess
 from typing import NamedTuple
@@ -75,15 +76,19 @@ class SniffResult:
 
         for symbol in self.symbols:
 
+            doc = f'"""{symbol.line}"""' if symbol.line else 'pass'
+
             if symbol.args is None:
                 stub = f'''
                     @lib.f
                     def {symbol.name}():
-                        """{symbol.line}"""
+                        {doc}
                     '''
 
             else:
-                args = ', '.join(f'{argname}: {hint}' for argname, hint in symbol.args)
+                args = ', '.join(
+                    f'{argname}_: {hint}' if keyword.iskeyword(argname) else f'{argname}: {hint}'
+                    for argname, hint in symbol.args)
                 result = f' -> {symbol.result}' if symbol.result else ''
 
                 hints_used.update(hint for _, hint in symbol.args)
@@ -94,7 +99,7 @@ class SniffResult:
                 stub = f'''
                     @lib.f
                     def {symbol.name}({args}){result}:
-                        """{symbol.line}"""
+                        {doc}
                     '''
 
             stubs.append(dedent(stub))
@@ -390,6 +395,7 @@ class NmSymbolSniffer:
     def _get_symbols(self, lines: list[str]) -> list[SniffedSymbol]:
 
         symbols = []
+        seen = set()
 
         for line in lines:
 
@@ -412,6 +418,19 @@ class NmSymbolSniffer:
                 continue
 
             name, _, srcline = name.partition('\t')
+
+            base, sep, version = name.partition('@')
+
+            if sep and not version.startswith('@'):
+                # Non-default symbol version (name@VER).
+                continue
+
+            name = base
+
+            if name in seen:
+                continue
+
+            seen.add(name)
 
             symbols.append(
                 SniffedSymbol(
