@@ -392,6 +392,12 @@ class DwarfSniffer:
 class NmSymbolSniffer:
     """Uses 'nm' command from 'binutils' package to sniff a library for exported symbols."""
 
+    # Loader and CRT internals, not library API.
+    _SYMBOLS_SKIP: ClassVar[frozenset] = frozenset({
+        '_init', '_fini', '_start', '_end', '_edata', '_etext',
+        '__bss_start', '__dso_handle', '_IO_stdin_used', '_Jv_RegisterClasses',
+    })
+
     def __init__(self, libpath: str | Path):
         """
 
@@ -441,7 +447,7 @@ class NmSymbolSniffer:
 
             address, symtype, name = chunks
 
-            if symtype != 'T' or name.startswith('_'):
+            if symtype != 'T' or name in self._SYMBOLS_SKIP:
                 continue
 
             name, _, srcline = name.partition('\t')

@@ -25,6 +25,7 @@
 * ** Fixed TypeError on bare decorator (@lib.f/@lib.m without parentheses) usage when no prefix was set.
 * ** Functions without a return type annotation are now documented as having a void result.
 * ** Invalid int_bits value now raises TypehintError instead of AssertionError.
+* ** Sniffing no longer drops all underscore-prefixed symbols (e.g. sanitizer runtimes APIs); only known loader internals are skipped.
 
 ### v0.8.1 [2026-11-14]
 * ** Fixed missing Optional import in utils (import error on Python <3.14).
