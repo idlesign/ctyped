@@ -429,6 +429,15 @@ class Library:
 
         Sniffing result can be used as 'ctyped' code generator.
 
+        .. note:: When ``pyelftools`` package is installed and the library
+            has DWARF debug information, generated code stubs include
+            deduced argument and result type hints. For stripped libraries
+            external debug files (e.g. from dbgsym packages) are used.
+
+        .. note:: Some exported names can not be given signatures: aliases
+            and ifunc-resolved symbols have no own entries in DWARF data,
+            and variadic functions are not annotated.
+
         """
         sniffer = NmSymbolSniffer(self.lib._name)
         result = sniffer.sniff()

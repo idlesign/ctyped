@@ -134,8 +134,21 @@ def test_sniff():
     result = mylib.sniff()
     dumped = result.to_ctyped()
     assert "mylib.so')" in dumped
-    assert 'def buggy1():' in dumped
+    assert 'def buggy1() -> int:' in dumped
     assert 'bind_types()' in dumped
+
+
+def test_sniff_typed():
+    result = mylib.sniff()
+    dumped = result.to_ctyped()
+
+    assert 'def f_prefix_one_char_p(val: str) -> str:' in dumped
+    assert 'def f_prefix_one_uint8_add(val: CInt8U) -> CInt8U:' in dumped
+    assert 'def f_prefix_one_byref_int(val: CPointer) -> None:' in dumped
+    # Callback and struct-by-value signatures can not be resolved, no stub annotations.
+    assert 'def f_prefix_one_backcaller():' in dumped
+    assert 'def f_prefix_one_handle_mystruct():' in dumped
+    assert 'from ctyped.types import' in dumped
 
 
 def test_basic():
