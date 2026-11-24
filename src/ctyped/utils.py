@@ -20,7 +20,7 @@ class FuncInfo(NamedTuple):
 
 class ErrorInfo(NamedTuple):
     num: int
-    code: Optional[str]
+    code: str | None
     msg: str
 
 
@@ -84,7 +84,7 @@ def cast_type(func_info, argname: str, thint: Any):
         thint = thint_str_to_obj(thint)
 
         if thint is None:
-            candidates = dir(ctyped_types) + ['int', 'str', 'float', 'bool', 'bytes']
+            candidates = [*dir(ctyped_types), 'int', 'str', 'float', 'bool', 'bytes']
             close = get_close_matches(thint_orig, candidates, n=3, cutoff=0.6)
             suggestion = f" Did you mean: {', '.join(close)}?" if close else ''
 

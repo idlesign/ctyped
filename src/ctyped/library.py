@@ -462,7 +462,8 @@ class Library:
                 'name_py': func_info.name_py,
                 'args': {
                     argname: argtype.__name__
-                    for argname, argtype in zip(func_info.annotations, getattr(func_c, 'argtypes', None) or [])
+                    for argname, argtype in zip(
+                        func_info.annotations, getattr(func_c, 'argtypes', None) or [], strict=False)
                     if argname != 'return'
                 },
                 'result': getattr(func_c.restype, '__name__', None),
