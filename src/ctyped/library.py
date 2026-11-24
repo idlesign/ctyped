@@ -439,8 +439,13 @@ class Library:
             and ifunc-resolved symbols have no own entries in DWARF data,
             and variadic functions are not annotated.
 
+        .. note:: Library loading is not required: you can create
+            the instance with ``autoload=False`` and sniff it right away.
+
         """
-        sniffer = NmSymbolSniffer(resolve_lib_path(self.lib._name))
+        libname = self.lib._name if self.lib is not None else self.name
+
+        sniffer = NmSymbolSniffer(resolve_lib_path(libname))
         result = sniffer.sniff()
         return result
 

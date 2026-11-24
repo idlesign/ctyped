@@ -124,6 +124,13 @@ def test_sniff_by_name():
     assert 'def adler32' in dumped
 
 
+def test_sniff_without_load():
+
+    lib = Library('z', autoload=False)
+    dumped = lib.sniff().to_ctyped()
+    assert 'def adler32' in dumped
+
+
 def test_gzread(tmp_path):
 
     payload = b'gzipped payload'

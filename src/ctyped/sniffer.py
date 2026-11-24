@@ -1,6 +1,7 @@
 import keyword
 import logging
 import subprocess
+from ctypes.util import find_library
 from typing import NamedTuple
 from datetime import datetime
 from pathlib import Path
@@ -47,6 +48,11 @@ def resolve_lib_path(name: str) -> str:
     if Path(name).exists():
         return name
 
+    soname = find_library(name.replace('lib', '', 1)) or name
+
+    if Path(soname).exists():
+        return soname
+
     try:
         result = subprocess.run(['ldconfig', '-p'], capture_output=True)
 
@@ -57,9 +63,9 @@ def resolve_lib_path(name: str) -> str:
 
         for line in result.stdout.decode().splitlines():
 
-            soname, sep, candidate = line.strip().partition(' => ')
+            soname_, sep, candidate = line.strip().partition(' => ')
 
-            if sep and soname.split(' ')[0] == name and Path(candidate).exists():
+            if sep and soname_.split(' ')[0] == soname and Path(candidate).exists():
                 return candidate
 
     raise SniffingError(f'Unable to resolve library path: {name}')

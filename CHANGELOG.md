@@ -14,6 +14,7 @@
 * ++ Added human-readable __repr__ for Library and CRef.
 * ++ Added Library.describe() returning a structured description of the declared interface (functions, structures, bound types).
 * ++ Added raises() errcheck helper and 'errcheck' parameter for .function()/.method() decorators.
+* ++ Library.sniff() can now be used without loading the library into the process (autoload=False).
 * ++ Library.sniff() now enriches sniffed symbols with function signatures from DWARF debug info when pyelftools package is available; external debug files (e.g. dbgsym packages) are used for stripped libraries.
 * ++ Unresolved type hint errors now suggest close matches.
 * ** Cleaned up ctyped.utils imports (no more star import).
